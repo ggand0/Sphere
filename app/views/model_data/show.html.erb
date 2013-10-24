@@ -1,0 +1,17 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Modeldata:</strong>
+  <!--<%= @model_datum.modeldata %>-->
+	<%= javascript_tag do %>
+		<!--window.model_json = <%= raw @model_datum.modeldata.to_json %>;-->
+		window.model_json = <%= raw @model_datum.modeldata %>
+	<% end %>
+</p>
+<!--<script>
+	var json_model = <%= @model_datum.modeldata %>;
+</script>-->
+<%= javascript_include_tag "three", "stats.min", "show_model2" %>
+
+<%= link_to 'Edit', edit_model_datum_path(@model_datum) %> |
+<%= link_to 'Back', model_data_path %>

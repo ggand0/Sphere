@@ -1,0 +1,36 @@
+<%= form_for(@model_datum, :html => {:multipart => true}) do |f| %>
+  <% if @model_datum.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@model_datum.errors.count, "error") %> prohibited this model_datum from being saved:</h2>
+
+      <ul>
+      <% @model_datum.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :fileName%><br>
+    <%= f.text_field :fileName %>
+  </div>
+  <!--<div class="field">
+    <%= f.label :modeldata %><br>
+    <%= f.text_field :modeldata %>
+  </div>-->
+  <div class="field">
+    <p>file</p>
+    <%= f.file_field :file %>
+  </div>
+  <!--<%= add_texture(f) %>-->
+  <!--<%= f.file_field :data%>-->
+  <div class="newPaperclipFiles">
+	<%= f.fields_for :texture do |t| %>
+		<%= t.file_field :data %>
+	<% end %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
