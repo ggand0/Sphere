@@ -11931,7 +11931,8 @@ THREE.SceneLoader.prototype = {
 
 			} else {
 
-				return urlBase + "/" + source_url;
+				//return urlBase + "/" + source_url;
+				return urlBase + source_url;
 
 			}
 
@@ -12742,6 +12743,9 @@ THREE.SceneLoader.prototype = {
 				var isCompressed = /\.dds$/i.test( textureJSON.url );
 				var fullUrl = get_url( textureJSON.url, data.urlBaseType );
 				var textureCallback = generateTextureCallback( 1 );
+				// debug log added by me
+				console.log("textureJSON.url = " + textureJSON.url);
+				console.log("texture full URL = " + fullUrl);
 
 				if ( isCompressed ) {
 

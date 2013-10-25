@@ -30,6 +30,10 @@ gem 'jbuilder', '~> 1.2'
 # added for image uploading by me
 gem 'paperclip', '~> 3.0'
 
+#gem 'linecache19', '>= 0.5.13', :git => 'https://github.com/robmathews/linecache19-0.5.13.git'
+gem 'ruby-debug-base19x', '>= 0.11.30.pre10'
+gem 'ruby-debug-ide', '>= 0.4.17.beta14'
+
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
   gem 'sdoc', require: false

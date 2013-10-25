@@ -2,16 +2,27 @@
 
 <p>
   <strong>Modeldata:</strong>
-  <!--<%= @model_datum.modeldata %>-->
 	<%= javascript_tag do %>
-		<!--window.model_json = <%= raw @model_datum.modeldata.to_json %>;-->
 		window.model_json = <%= raw @model_datum.modeldata %>
+		
+		<!-- If modeldata has at least one texture, set the path -->
+		<% if !@model_datum.textures.empty? %>
+			window.texture_path = "<%= @textures.data.url %>";
+		<% else %>
+  			window.texture_path = "";
+		<% end %>
 	<% end %>
 </p>
-<!--<script>
-	var json_model = <%= @model_datum.modeldata %>;
-</script>-->
-<%= javascript_include_tag "three", "stats.min", "show_model2" %>
+
+<%= javascript_include_tag "three", "stats.min", "show_model" %>
 
 <%= link_to 'Edit', edit_model_datum_path(@model_datum) %> |
 <%= link_to 'Back', model_data_path %>
+<br>
+<!-- Put texture image for debug -->
+<% if !@model_datum.textures.empty? %>
+	This model has the following textures:<br>
+	<%= image_tag @textures.data.url %>
+<% else %>
+	This model does not have any textures.
+<% end %>
