@@ -11,13 +11,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131024064231) do
+ActiveRecord::Schema.define(version: 20131027023440) do
 
   create_table "model_data", force: true do |t|
     t.string   "modeldata"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "fileName"
+    t.string   "title"
+  end
+
+  create_table "stages", force: true do |t|
+    t.string   "title"
+    t.string   "scene_data"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "textures", force: true do |t|

@@ -17,3 +17,6 @@
 
 # Ignore Gemfile
 Gemfile
+
+# Ignore paperclip image files
+/public/system
