@@ -10,6 +10,14 @@ class StagesController < ApplicationController
   # GET /stages/1
   # GET /stages/1.json
   def show
+    @textures = @stage.textures[0]
+    if !@stage.textures.empty?
+      p(@stage.textures)
+      p("debug texture url:")
+      p(@textures.data.url)
+    end
+    p("debug scene_data:")
+    p(@stage)
   end
 
   # GET /stages/new
@@ -24,7 +32,33 @@ class StagesController < ApplicationController
   # POST /stages
   # POST /stages.json
   def create
-    @stage = Stage.new(stage_params)
+    #@stage = Stage.new(stage_params)
+    
+    # JSONファイルから文字列を抽出する
+    file = params['stage']['file']# Upされたファイルにアクセス
+    
+=begin
+    jsfile = File.open(defPath + file.original_filename, 'r')
+    @jsonstring = ""
+    while line = file.gets
+      @jsonstring += line
+    end
+=end
+    
+    p("file params:")
+    #p(params['stage']['file'])
+    
+    @jsonstring = file.read
+    p(@jsonstring)
+    @stage = Stage.new(:scene_data => @jsonstring, :title => params[:stage][:title])
+    p("stage.scene_data:")
+    p(@stage.scene_data)
+    #p(@stage.nothing)
+      
+    if params[:stage][:texture] != nil
+      @textures = Texture.new(:data => params[:stage][:texture]['data'])
+      @stage.textures << @textures
+    end
 
     respond_to do |format|
       if @stage.save
@@ -69,6 +103,7 @@ class StagesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def stage_params
-      params[:stage]
+      #params[:stage]
+      params.require(:stage).permit(:scene_data, :textures)
     end
 end

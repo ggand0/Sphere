@@ -10,6 +10,21 @@
       </ul>
     </div>
   <% end %>
+  
+  <div class="field">
+    <%= f.label :title%><br>
+    <%= f.text_field :title %>
+  </div>
+
+  <div class="field">
+    <p>file</p>
+    <%= f.file_field :file %>
+  </div>
+  <div class="textureFiles">
+	<%= f.fields_for :texture do |t| %>
+		<%= t.file_field :data %>
+	<% end %>
+  </div>
 
   <div class="actions">
     <%= f.submit %>

@@ -13,7 +13,6 @@
   <tbody>
     <% @model_data.each do |model_datum| %>
       <tr>
-        <!--<td><%= model_datum.modeldata %></td>-->
         <td><%= model_datum.title %></td>
         <td><%= link_to 'Show', model_datum %></td>
         <td><%= link_to 'Edit', edit_model_datum_path(model_datum) %></td>

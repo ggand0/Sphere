@@ -78,7 +78,7 @@ class ModelDataController < ApplicationController
       @jsonstring += line
     end
     
-    @model_datum = ModelDatum.new(:modeldata => @jsonstring, :fileName => params[:model_datum][:fileName])
+    @model_datum = ModelDatum.new(:modeldata => @jsonstring, :title => params[:model_datum][:title])
     
     p("form data:")
     p(params[:model_datum][:texture])
