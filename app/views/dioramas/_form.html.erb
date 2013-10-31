@@ -1,0 +1,33 @@
+<%= form_for(@diorama) do |f| %>
+  <% if @diorama.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@diorama.errors.count, "error") %> prohibited this diorama from being saved:</h2>
+
+      <ul>
+      <% @diorama.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :title %><br>
+    <%= f.text_field :title %>
+  </div>
+  <div class="field">
+  	<%= f.label :stage %><br>
+	<%= f.text_field :stage, :id => "stage_field" %>
+  </div>
+  
+  <div class="field">
+  	<%= f.label :model_transforms %><br>
+  	<% @diorama.model_transforms.build %>
+	<%= f.fields_for :model_transforms do |mt| %>
+		<%= mt.text_field :transform, :id => "transforms_field" %>
+	<% end %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

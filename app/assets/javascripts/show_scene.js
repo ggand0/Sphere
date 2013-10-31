@@ -56,18 +56,21 @@ function createScene(result) {
 		camera.position.y + 1000, 50);
 	camera.lookAt(lookAtPos);
 	controls = new THREE.OrbitControls( camera, renderer.domElement ); 
-	controls.center = lookAtPos;
 	
+	//controls.center = lookAtPos;	// lookAtPosは変わるが回転中心も変わる
 	//camera.lookAt(scene.scene.position);
 	scene.camera = camera;
-	// CONTROLS
-	//controls = new THREE.OrbitControls( camera, renderer.domElement );
 	
 	
 	/*window.addEventListener('DOMMouseScroll', onDocumentMouseWheel, false);
   	window.addEventListener('mousewheel', onDocumentMouseWheel, false);*/
 	//document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 	
+	// add mouse click event
+	//document.addEventListener('click', onDocumentMouseClick, false);
+	//window.addEventListener('onclick', onDocumentMouseClick, false);
+	//var el = document.getElementById("element-id");
+	//el.addEventListener("click", onDocumentMouseClick, false);
 	
 	text2 = document.createElement('div');
 	text2.style.position = 'absolute';
@@ -121,21 +124,29 @@ function render() {
     renderer.render(scene, scene.camera);
 };
 
-// マウス操作関連
+// マウスイベント関連
 /*var screenW = window.innerWidth;
 var screenH = window.innerHeight; 
-var spdx = 0, spdy = 0, mouseX = 0, mouseY = 0, mouseDown = false;
+var spdx = 0, spdy = 0, mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', function(event) {
     mouseX = event.clientX;
     mouseY = event.clientY;
-}, false);
+}, false);*/
+var mouseDown = false;
 document.body.addEventListener("mousedown", function(event) {
-    mouseDown = true
+    mouseDown = true;
 }, false);
 document.body.addEventListener("mouseup", function(event) {
-    mouseDown = false
+    mouseDown = false;
 }, false);
-function onDocumentMouseMove(event) {
+document.body.addEventListener("onclick", function(event) {
+    
+}, false);
+function onDocumentMouseClick(event) {
+	scene.scene.add(selected_model);
+    console.log("click event was called.");
+}
+/*function onDocumentMouseMove(event) {
 	mouseX = event.clientX - windowHalfX;
 	mouseY = event.clientY - windowHalfY;
 }*/

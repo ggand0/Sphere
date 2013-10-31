@@ -32,29 +32,18 @@ class StagesController < ApplicationController
   # POST /stages
   # POST /stages.json
   def create
-    #@stage = Stage.new(stage_params)
-    
     # JSONファイルから文字列を抽出する
     file = params['stage']['file']# Upされたファイルにアクセス
     
-=begin
-    jsfile = File.open(defPath + file.original_filename, 'r')
-    @jsonstring = ""
-    while line = file.gets
-      @jsonstring += line
-    end
-=end
-    
     p("file params:")
-    #p(params['stage']['file'])
-    
+
     @jsonstring = file.read
     p(@jsonstring)
     @stage = Stage.new(:scene_data => @jsonstring, :title => params[:stage][:title])
     p("stage.scene_data:")
     p(@stage.scene_data)
     #p(@stage.nothing)
-      
+    
     if params[:stage][:texture] != nil
       @textures = Texture.new(:data => params[:stage][:texture]['data'])
       @stage.textures << @textures

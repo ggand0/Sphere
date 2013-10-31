@@ -54,7 +54,7 @@ function createScene(result) {
     stats.domElement.style.left= '500px';
     stats.domElement.style.zIndex = 100;
     document.body.appendChild(stats.domElement);
-	 
+	
 	// (2)create scene
 	//var scene = new THREE.Scene();
 	//var loader = new THREE.SceneLoader();
