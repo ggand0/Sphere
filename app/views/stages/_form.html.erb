@@ -1,16 +1,16 @@
-<%= form_for(@model_datum) do |f| %>
-  <% if @model_datum.errors.any? %>
+<%= form_for(@stage) do |f| %>
+  <% if @stage.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(@model_datum.errors.count, "error") %> prohibited this model_datum from being saved:</h2>
+      <h2><%= pluralize(@stage.errors.count, "error") %> prohibited this stage from being saved:</h2>
 
       <ul>
-      <% @model_datum.errors.full_messages.each do |msg| %>
+      <% @stage.errors.full_messages.each do |msg| %>
         <li><%= msg %></li>
       <% end %>
       </ul>
     </div>
   <% end %>
-
+  
   <div class="field">
     <%= f.label :title%><br>
     <%= f.text_field :title %>
@@ -20,12 +20,12 @@
     <p>file</p>
     <%= f.file_field :file %>
   </div>
-
-  <div class="newPaperclipFiles">
+  <div class="textureFiles">
 	<%= f.fields_for :texture do |t| %>
 		<%= t.file_field :data %>
 	<% end %>
   </div>
+
   <div class="actions">
     <%= f.submit %>
   </div>

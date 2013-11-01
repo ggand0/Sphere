@@ -1,0 +1,58 @@
+<style>
+	#site-box {  width: 1200px;  }
+	#left-box {
+	  width 600px;
+	  float:left;
+	  margin-right:70px;
+	}
+	#right-box {
+	  float:right;
+	}
+	.debugText {
+		position: absolute;
+		width: 100;
+		height: 100;
+		top: 40px;
+		left: 0px;
+	}
+</style>
+<h1>New diorama</h1>
+
+<!-- とりあえず表示しているだけ -->
+<h2>Stages:</h2>
+<% @stages.each do |s| %>
+  <tr>
+    <td><%= s.title %></td>
+    <td><%= link_to 'Show', s %></td>
+    <td>
+    	<%= form_tag do %>
+    		<%= check_box_tag "use"%>
+    	<% end %>
+    </td>
+  </tr>
+<% end %>
+<h2>ModelData:</h2>
+<% @model_data.each do |model_datum| %>
+  <tr>
+    <td><%= model_datum.title %></td>
+    <td><%= link_to 'Show', model_datum %></td>
+  </tr>
+<% end %>
+
+<div id = "left-box">
+<%= javascript_tag do %>
+	window.model_json = <%= raw @selectedStage.scene_data %>
+	window.selected_model = <%= raw @selectedModel.modeldata %>
+	
+	<% unless @selectedStage.textures.empty? %>
+		window.texture_path = "<%= @selectedStageTextures.data.url %>";
+	<% else %>
+		window.texture_path = "";
+	<% end %>
+<% end %>
+<%= javascript_include_tag "three", "stats.min", "create_diorama", "OrbitControls" %>
+</div>
+
+<%= render 'form' %>
+
+<%= link_to 'Back', dioramas_path %>

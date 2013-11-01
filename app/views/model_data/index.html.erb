@@ -13,8 +13,7 @@
   <tbody>
     <% @model_data.each do |model_datum| %>
       <tr>
-        <!--<td><%= model_datum.modeldata %></td>-->
-        <td><%= model_datum.fileName %></td>
+        <td><%= model_datum.title %></td>
         <td><%= link_to 'Show', model_datum %></td>
         <td><%= link_to 'Edit', edit_model_datum_path(model_datum) %></td>
         <td><%= link_to 'Destroy', model_datum, method: :delete, data: { confirm: 'Are you sure?' } %></td><!---->
@@ -25,4 +24,7 @@
 
 <br>
 
-<%= link_to 'New Model datum', new_model_datum_path %>
+<%= link_to 'New Model datum', new_model_datum_path %><br>
+<%= link_to 'Index of Stage', stages_path %><br>
+<%= link_to 'Index of Diorama', dioramas_path %>
+

@@ -1,7 +1,7 @@
 class Texture < ActiveRecord::Base
-  belongs_to :model_data
-  has_attached_file :data
+  #belongs_to :model_data
+  #belongs_to :stage
+  belongs_to :texturable, :polymorphic => true
   
-  #attr_accessible :model_datum_id
-
+  has_attached_file :data
 end
