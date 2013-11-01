@@ -11,7 +11,7 @@ class StagesController < ApplicationController
   # GET /stages/1.json
   def show
     @textures = @stage.textures[0]
-    if !@stage.textures.empty?
+    unless @stage.textures.empty?
       p(@stage.textures)
       p("debug texture url:")
       p(@textures.data.url)
@@ -50,7 +50,7 @@ class StagesController < ApplicationController
     end
 
     respond_to do |format|
-      if @stage.save
+      if @stage.save!
         format.html { redirect_to @stage, notice: 'Stage was successfully created.' }
         format.json { render action: 'show', status: :created, location: @stage }
       else

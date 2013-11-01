@@ -23,7 +23,7 @@ class ModelDataController < ApplicationController
   # GET /model_data/1.json
   def show
     @textures = @model_datum.textures[0]
-    if !@model_datum.textures.empty?
+    unless @model_datum.textures.empty?
       p(@model_datum.textures)
       p("debug texture url:")
       p(@textures.data.url)
@@ -100,7 +100,7 @@ class ModelDataController < ApplicationController
     # saveしてDBへ保存
     respond_to do |format|
       #if @model_datum.save && @textures.save
-      if @model_datum.save
+      if @model_datum.save!
         format.html { redirect_to @model_datum, notice: 'Model datum was successfully created.' }
         format.json { render action: 'show', status: :created, location: @model_datum }
       else

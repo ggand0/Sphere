@@ -1,3 +1,12 @@
+<style>
+	#stats {
+		position: absolute
+		top: 0px;
+		left: 500px;
+		zIndex: 100px;
+	}
+</style>
+
 <p id="notice"><%= notice %></p>
 
 <p>
@@ -14,7 +23,7 @@
 	<% end %>
 </p>
 
-<%= javascript_include_tag "three", "stats.min", "show_model" %>
+<%= javascript_include_tag "three", "stats.min", "jquery.createScene", "show_model" %>
 
 <%= link_to 'Edit', edit_model_datum_path(@model_datum) %> |
 <%= link_to 'Back', model_data_path %>

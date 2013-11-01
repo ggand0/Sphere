@@ -1,171 +1,122 @@
-window.onload = function() {
-	console.log("function loaded.");
-	console.log("model_json variable:\n" + model_json);
-	//console.log(model_json["defaults"]);
-	
-	// url関連のデバッグ
-	//console.log(model_json["textures"]);
-	for(var tex in model_json["textures"]){
-	    //console.log(tex);
-	    
-	    //console.log(tex['url']);
-	    //console.log(tex.url);
-	    //console.log(model_json['textures'][tex]);//ok
-	    console.log(model_json['textures'][tex]['url']);
-	}
-	
-	var loader = new THREE.SceneLoader();
-	//loader.parse(model_json, function(result){ console.log(result); scene = result;}, '');
-	//loader.parse(model_json, createScene, '');
-	
-	var sig = "file://";
-	console.log("texture_path variable:\n" + texture_path);
-	console.log(sig+texture_path);
-	//loader.parse(model_json, createScene, sig+texture_path);
-	loader.parse(model_json, createScene, texture_path);
-};
+$(function() {
+	THREE.ImageUtils.crossOrigin = "";
 
-THREE.ImageUtils.crossOrigin = "";
-
-var renderer = new THREE.WebGLRenderer({ antialias:true });
-renderer.setSize(500, 500);
-renderer.setClearColorHex(0x000000, 1);
-document.body.appendChild(renderer.domElement);
-
-var mesh;
-var scene;
-var stats;
-var isMouseDown = false;
-var fov = 70;
-
-function createScene(result) {
-	console.log("callback function called");
-	
-	// (1)Initialize renderer
-	/*var renderer = new THREE.WebGLRenderer({ antialias:true });
+	var renderer = new THREE.WebGLRenderer({ antialias:true });
 	renderer.setSize(500, 500);
 	renderer.setClearColorHex(0x000000, 1);
-	document.body.appendChild(renderer.domElement);*/
+	$('body').append(renderer.domElement);
 	
-	// set stats
-    stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    stats.domElement.style.left= '500px';
-    stats.domElement.style.zIndex = 100;
-    document.body.appendChild(stats.domElement);
-	
-	// (2)create scene
-	//var scene = new THREE.Scene();
-	//var loader = new THREE.SceneLoader();
-	//loader.parse(model_json, function(result){scene = result;}, '');
-	console.log(result);
-	scene = result;
-	      
-	 
-	// (3)make cameras
-	var camera = new THREE.PerspectiveCamera(15, 500 / 500);
-	camera.position = new THREE.Vector3(0, 0, 8);
-	camera.lookAt(new THREE.Vector3(0, 0, 0));
-	//scene.add(camera);
-	//result.camera = camera;
-	scene.camera = camera;
-	window.addEventListener('DOMMouseScroll', onDocumentMouseWheel, false);
-  	window.addEventListener('mousewheel', onDocumentMouseWheel, false);
+	var mesh = new THREE.Mesh();	// createSceneに参照渡ししたいのでオブジェクトを入れておく
+	var scene, stats;
+	var isMouseDown = false;
+	var fov = 70;
 
-	 
-	// (4)make lights
-	var light = new THREE.DirectionalLight(0xcccccc);
-	light.position = new THREE.Vector3(0.577, 0.577, 0.577);
-	//scene.add(light);
-	var ambient = new THREE.AmbientLight(0x333333);
-	//scene.add(ambient);
-	 
-	 
-	// (5)make mesh
-	//var loader = new THREE.JSONLoader();
-	// see http://stackoverflow.com/questions/17182533/threejs-fbx-convertor-r58-cannot-work-with-jsonloader?answertab=active#tab-top
-	//var model = loader.parse(model_json);
-	//loader.parse(model_json, function(result){ console.log("result = "); console.log(result); }, '');
-	  
-	  
-	// old:
-	//var geometry = new THREE.SphereGeometry(1, 32, 16);
-	//var geometry = model['geometry'];
-	//var material = model['materials'];
-	/*var material = new THREE.MeshPhongMaterial({
-	color: 0xffffff, ambient: 0xffffff,
-	specular: 0xcccccc, shininess:50, metal:true,
-	map: THREE.ImageUtils.loadTexture('images/1_earth_8k.jpg') });*/
-	// see http://tp69.wordpress.com/2013/06/17/cors-bypass/
-	//var mesh = new THREE.Mesh(model.geometry, model.material);
-	/*var mesh = new THREE.Mesh(model.geometry, new THREE.MeshBasicMaterial());
-	scene.add(mesh);*/
-	 
-	// (6)rendering
-	var baseTime = +new Date;
-	//render(scene.geometries[0], result.materials[0]);
-	console.log("scene:" + scene);
-	//mesh = new THREE.Mesh(scene.geometries[0], scene.materials[0]);
-	
-	// 変数として持ちたいのでsceneから読み込んだ後再び追加
-	mesh = scene.scene.children[0];
-	scene.scene.children.splice(0, 1);
-	scene.scene.add(mesh);
-	console.log("mesh = " + mesh);
-	
-	
-	//render();
-	animate();
-}
+	init();
 
-// staticに描画するだけの関数
-function render() {
-	//mesh.rotation.y = 0.3 * (+new Date - baseTime) / 1000;
-   	requestAnimationFrame(render);
-   	//mesh = new THREE.Mesh(result.geometries[0], result.materials[0]);
-   	//mesh = new THREE.Mesh(g, m);
-   	mesh = new THREE.Mesh(scene.geometries[0], scene.materials[0]);
-    
-    //renderer.render(result.scene, result.camera);
-    renderer.render(scene, scene.camera);
-};
+	
+	// railsで指定した、JSONが入ってるグローバル変数をSceneLoaderに投げる
+	function init() {
+		console.log("function loaded.");
+		console.log("model_json variable:\n" + model_json);
+		
+		// url関連のデバッグ
+		for (var tex in model_json["textures"]){
+		    //console.log(model_json['textures'][tex]);//ok
+		    console.log(model_json['textures'][tex]['url']);
+		}
+		
+		var loader = new THREE.SceneLoader();
+		//loader.parse(model_json, function(result){ console.log(result); scene = result;}, '');
+		//loader.parse(model_json, createScene, '');
+		
+		console.log("texture_path variable:\n" + texture_path);
+		//loader.parse(model_json, createScene, sig+texture_path);
+		//loader.parse(model_json, createScene, texture_path);
+		loader.parse(model_json, initScene, texture_path);
+	}
+	
+	// sceneを変数に入れるだけのコールバック関数
+	function initScene(result) {
+		console.log("callback function called.");
+		scene = result;
+		console.log(scene);
 
-// マウス操作関連
-var screenW = window.innerWidth;
-var screenH = window.innerHeight; /*SCREEN*/
-var spdx = 0, spdy = 0, mouseX = 0, mouseY = 0, mouseDown = false; /*MOUSE*/
-document.addEventListener('mousemove', function(event) {
-    mouseX = event.clientX;
-    mouseY = event.clientY;
-}, false);
-document.body.addEventListener("mousedown", function(event) {
-    mouseDown = true
-}, false);
-document.body.addEventListener("mouseup", function(event) {
-    mouseDown = false
-}, false);
+		// set stats
+	    stats = new Stats();
+	    /*$s = $('<div>');
+		$s.addClass('stats');
+	    stats.domElement.style = $s.css();*/
+	   	stats.domElement.style.position = 'absolute';
+	    stats.domElement.style.top = '0px';
+	    stats.domElement.style.left= '500px';
+	    stats.domElement.style.zIndex = 100;
+	    $('body').append(stats.domElement);
 
-// meshを動かした後renderする関数
-function animate() {    
-    spdy =  (screenH / 2 - mouseY) / 40;
-    spdx =  (screenW / 2 - mouseX) / 40;
-    
-    if (mouseDown){
-        mesh.rotation.x = spdy;
-        mesh.rotation.y = spdx;
-        //console.log("spdy:" + spdy);
-    }
-    //render();
-    requestAnimationFrame( animate );
-    renderer.render(scene.scene, scene.camera);
-    
-    // FPS表示の更新
-    stats.update();
-}
-function onDocumentMouseWheel( event ) {
-    fov -= event.wheelDeltaY * 0.05;
-    //scene.camera.projectionMatrix = THREE.Matrix4.makePerspective( fov, window.innerWidth / window.innerHeight, 1, 1100 );
-    //scene.camera.projectionMatrix = (new THREE.Matrix4()).makePerspective( fov, window.innerWidth / window.innerHeight, 1, 1100 );//15, 500 / 500
-    scene.camera.projectionMatrix = (new THREE.Matrix4()).makePerspective( fov, 500 / 500, 1, 1100 );
-}
+
+	  	$(document).on('mousewheel', onDocumentMouseWheel);
+	    
+		
+		$(document).test();
+		$(document).createScene(scene, mesh);
+		
+		
+		// 変数として持ちたいのでsceneから読み込んだ後再び追加
+		mesh = scene.scene.children[0];
+		scene.scene.children.splice(0, 1);
+		scene.scene.add(mesh);
+		console.log("mesh = " + mesh);
+		
+		animate();
+	}
+	
+	// createScene：試験的にjQueryプラグイン化した
+	
+	// staticに描画するだけの関数[未使用]
+	function render() {
+	   	requestAnimationFrame(render);
+	   	mesh = new THREE.Mesh(scene.geometries[0], scene.materials[0]);
+	    renderer.render(scene, scene.camera);
+	};
+
+	// マウス操作関連
+	var screenW = window.innerWidth;
+	var screenH = window.innerHeight;
+	var spdx = 0, spdy = 0, mouseX = 0, mouseY = 0, mouseDown = false;
+	$(document).on('mousemove', function(event) {
+	    mouseX = event.clientX;
+	    mouseY = event.clientY;
+	});
+	$(document).on("mousedown", function(event) {
+	    mouseDown = true;
+	});
+	$(document).on("mouseup", function(event) {
+	    mouseDown = false;
+	});
+	
+	// meshを動かした後renderする関数
+	function animate() {    
+	    // 描画処理
+	    requestAnimationFrame( animate );
+	    renderer.render(scene.scene, scene.camera);
+	    
+	    // 更新処理
+	    spdy =  (screenH / 2 - mouseY) / 40;
+	    spdx =  (screenW / 2 - mouseX) / 40;
+	    if (mouseDown){
+	        mesh.rotation.x = spdy;
+	        mesh.rotation.y = spdx;
+	    }
+	    stats.update();
+	}
+	function onDocumentMouseWheel( event ) {
+		// jQueryのeventにwheelDeltaが無いのでoriginalEventを参照
+	    fov -= event.originalEvent.wheelDeltaY * 0.05;
+	    
+	    //scene.camera.projectionMatrix = THREE.Matrix4.makePerspective(
+	    //	fov, window.innerWidth / window.innerHeight, 1, 1100 );
+	    //scene.camera.projectionMatrix = (new THREE.Matrix4()).makePerspective(
+	    //	fov, window.innerWidth / window.innerHeight, 1, 1100 );//15, 500 / 500
+	    scene.camera.projectionMatrix = (new THREE.Matrix4()).makePerspective( fov, 500 / 500, 1, 1100 );
+	}
+
+});
