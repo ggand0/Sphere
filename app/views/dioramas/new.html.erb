@@ -1,42 +1,41 @@
-
-
 <h1>New diorama</h1>
 
 <!-- とりあえず表示しているだけ -->
-<h2>Stages:</h2>
-<% @stages.each do |s| %>
-  <tr>
-    <td><%= s.title %></td>
-    <td><%= link_to 'Show', s %></td>
-    <td>
-    	<%= form_tag do %>
-    		<%= check_box_tag "use"%>
-    	<% end %>
-    </td>
-  </tr>
-<% end %>
-<h2>ModelData:</h2>
-<% @model_data.each do |model_datum| %>
-  <tr>
-    <td><%= model_datum.title %></td>
-    <td><%= link_to 'Show', model_datum %></td>
-  </tr>
-<% end %>
-
-<div id = "left-box">
-<%= javascript_tag do %>
-	window.modelJSON = <%= raw @selectedStage.scene_data %>
-	window.selectedModel = <%= raw @selectedModel.modeldata %>
-	
-	<% unless @selectedStage.textures.empty? %>
-		window.texturePath = "<%= @selectedStageTextures.data.url %>";
-	<% else %>
-		window.texturePath = "";
+<div id = "site-box">
+	<h2>Stages:</h2>
+	<% @stages.each do |s| %>
+	  <tr>
+	    <td><%= s.title %></td>
+	    <td><%= link_to 'Show', s %></td>
+	    <td>
+	    	<%= form_tag do %>
+	    		<%= check_box_tag "use"%>
+	    	<% end %>
+	    </td>
+	  </tr>
 	<% end %>
-<% end %>
-<%= javascript_include_tag "three", "stats.min", "create_diorama", "OrbitControls", "EditorControls", "TrackballControls" %>
+	<h2>ModelData:</h2>
+	<% @model_data.each do |model_datum| %>
+	  <tr>
+	    <td><%= model_datum.title %></td>
+	    <td><%= link_to 'Show', model_datum %></td>
+	  </tr>
+	<% end %>
 </div>
-
-<%= render 'form' %>
-
-<%= link_to 'Back', dioramas_path %>
+<div id = "left-box">
+	<%= render 'form' %>
+	<%= link_to 'Back', dioramas_path %>
+</div>
+<div id = "left-box">
+	<%= javascript_tag do %>
+		window.modelJSON = <%= raw @selectedStage.scene_data %>
+		window.selectedModel = <%= raw @selectedModel.modeldata %>
+		
+		<% unless @selectedStage.textures.empty? %>
+			window.texturePath = "<%= @selectedStageTextures.data.url %>";
+		<% else %>
+			window.texturePath = "";
+		<% end %>
+	<% end %>
+	<%= javascript_include_tag "three", "stats.min", "creatediorama", "OrbitControls", "EditorControls", "TrackballControls" %>
+</div>
