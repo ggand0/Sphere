@@ -1,3 +1,20 @@
 // Place all the styles related to the Dioramas controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+#site-box {  width: 1200px;  }
+#left-box {
+  width: 600px;
+  float:left;
+  margin-right:70px;
+}
+#right-box {
+  float:right;
+}
+.debugText {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  top: 40px;
+  left: 0px;
+}

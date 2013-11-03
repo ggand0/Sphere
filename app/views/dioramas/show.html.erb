@@ -1,14 +1,3 @@
-<style>
-	#site-box {  width: 1200px;  }
-	#left-box {
-	  width: 600px;
-	  float:left;
-	  margin-right:70px;
-	}
-	#right-box {
-	  float:right;
-	}
-</style>
 <p id="notice"><%= notice %></p>
 
 <div id = "left-box">
@@ -18,19 +7,19 @@
 	</p>
 	
 	<%= javascript_tag do %>
-		window.model_json = <%= raw @diorama.stage.scene_data %>
-		window.model_transforms = <%= raw @positions %>
-		window.selected_model = <%= raw @selectedModel.modeldata %>
+		window.modelJSON = <%= raw @diorama.stage.scene_data %>
+		window.modelTransforms = <%= raw @positions %>
+		window.selectedModel = <%= raw @selectedModel.modeldata %>
 		
 		<!-- If modeldata has at least one texture, set the path -->
 		<% unless @diorama.stage.textures.empty? %>
-			window.texture_path = "<%= @diorama.stage.textures[0].data.url %>";
+			window.texturePath = "<%= @diorama.stage.textures[0].data.url %>";
 		<% else %>
-			window.texture_path = "";
+			window.texturePath = "";
 		<% end %>
 	<% end %>
 	
-	<%= javascript_include_tag "three", "stats.min", "show_diorama", "OrbitControls" %><br>
+	<%= javascript_include_tag "three", "stats.min", "show_diorama", "OrbitControls", "EditorControls", "TrackballControls" %><br>
 </div>
 
 <%= link_to 'Edit', edit_diorama_path(@diorama) %> |
