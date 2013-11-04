@@ -32,7 +32,7 @@ $ ->
   radious = 1000
   theta = 45
   phi = 60
-  
+  modelObjects = new Array()
   
   
   
@@ -78,6 +78,7 @@ $ ->
       console.log(pos)
       newMesh.position = pos
       scene.scene.add(newMesh)
+      modelObjects.push(newMesh)  # 判定用に使用する、モデルのみを入れる配列
       
       i++
     
@@ -169,6 +170,29 @@ $ ->
     
     #animate()
     scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
+    
+    
+    # Picking ray detection
+    rect = event.target.getBoundingClientRect();
+    # マウス位置(2D)
+    mouseX = event.clientX - rect.left;
+    mouseY = event.clientY - rect.top;
+    # マウス位置(3D)
+    mouseX = (mouseX / canvasSize.x) * 2 - 1;
+    mouseY =-(mouseY / canvasSize.y) * 2 + 1;
+    # マウスベクトル
+    vector = new THREE.Vector3(mouseX, mouseY, 1);
+    projector.unprojectVector( vector, scene.camera )
+    raycaster = new THREE.Raycaster( scene.camera.position,
+      vector.sub( scene.camera.position ).normalize() )
+    intersects = raycaster.intersectObjects(modelObjects)
+
+    #console.log(vector)
+    console.log(modelObjects)
+    console.log(intersects)
+    if intersects.length > 0
+      intersects[0].object.material.color.setHex( Math.random() * 0xffffff )
+
   )
   $(document).on("mouseup", (event) ->
     isMouseDown = false
