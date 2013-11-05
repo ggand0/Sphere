@@ -33,8 +33,9 @@ $ ->
   theta = 45
   phi = 60
   modelObjects = new Array()
-  
-  
+  selectedObject = undefined # マウスで選択されたオブジェクトを格納する
+  plane = undefined           # マウスでオブジェクトを移動する際に使用する平面オブジェクト。不可視
+  offset = new THREE.Vector3()
   
   
   init = ->
@@ -153,7 +154,8 @@ $ ->
       console.log(i.rotation.y)
       #scene.scene.children[i].rotation.y = -90 * Math.PI / 180
       i.rotation.x = -90 * Math.PI / 180
-    
+      
+      
     # 描画
     animate()
 
@@ -173,15 +175,15 @@ $ ->
     
     
     # Picking ray detection
-    rect = event.target.getBoundingClientRect();
+    rect = event.target.getBoundingClientRect()
     # マウス位置(2D)
-    mouseX = event.clientX - rect.left;
-    mouseY = event.clientY - rect.top;
+    mouseX = event.clientX - rect.left
+    mouseY = event.clientY - rect.top
     # マウス位置(3D)
-    mouseX = (mouseX / canvasSize.x) * 2 - 1;
-    mouseY =-(mouseY / canvasSize.y) * 2 + 1;
+    mouseX = (mouseX / canvasSize.x) * 2 - 1
+    mouseY =-(mouseY / canvasSize.y) * 2 + 1
     # マウスベクトル
-    vector = new THREE.Vector3(mouseX, mouseY, 1);
+    vector = new THREE.Vector3(mouseX, mouseY, 1)
     projector.unprojectVector( vector, scene.camera )
     raycaster = new THREE.Raycaster( scene.camera.position,
       vector.sub( scene.camera.position ).normalize() )
@@ -192,6 +194,7 @@ $ ->
     console.log(intersects)
     if intersects.length > 0
       intersects[0].object.material.color.setHex( Math.random() * 0xffffff )
+      selectedObject = intersects[0]
 
   )
   $(document).on("mouseup", (event) ->
@@ -210,17 +213,17 @@ $ ->
       # 長い計算式はJavascriptの方が見やすいと判断した（式の途中で改行出来るという点で）
       `
       theta = - ( ( event.originalEvent.clientX - onMouseDownPosition.x ) * 0.5 )
-              + onMouseDownTheta;
+              + onMouseDownTheta
       phi = ( ( event.originalEvent.clientY - onMouseDownPosition.y ) * 0.5 )
-            + onMouseDownPhi;
-      phi = Math.min( 180, Math.max( 0, phi ) );
+            + onMouseDownPhi
+      phi = Math.min( 180, Math.max( 0, phi ) )
 
       scene.camera.position.x = radious * Math.sin( theta * Math.PI / 360 )
-                          * Math.cos( phi * Math.PI / 360 );
-      scene.camera.position.y = radious * Math.sin( phi * Math.PI / 360 );
+                          * Math.cos( phi * Math.PI / 360 )
+      scene.camera.position.y = radious * Math.sin( phi * Math.PI / 360 )
       scene.camera.position.z = radious * Math.cos( theta * Math.PI / 360 )
-                          * Math.cos( phi * Math.PI / 360 );
-      scene.camera.updateMatrix();
+                          * Math.cos( phi * Math.PI / 360 )
+      scene.camera.updateMatrix()
       `
 
     mouse3D = projector.unprojectVector(
@@ -236,6 +239,7 @@ $ ->
     
     #render()
     scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
+    
     
   $(document).on("mousewheel", (event) ->
     ###fov -= event.wheelDeltaY * 0.05

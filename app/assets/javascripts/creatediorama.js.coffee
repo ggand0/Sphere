@@ -30,12 +30,21 @@ $ ->
   radious = 1000
   theta = 45
   phi = 60
+  enableControl = true   # モデルが選択されている時はカメラ操作をオフにする。そのためのフラグ
+  
+  # Mouse picking関係
+  mouseX = undefined
+  mouseY = undefined
+  modelObjects = new Array()
+  SELECTED = undefined        # マウスで選択されたオブジェクトを格納する
+  INTERSECTED = undefined
+  plane = undefined           # マウスでオブジェクトを移動する際に使用する平面オブジェクト。不可視
+  offset = new THREE.Vector3()
   
   
   
   
-  
-  # railsで指定した、JSONが入ってるグローバル変数をSceneLoaderに投げる
+  # Railsで指定した、JSONが入ってるグローバル変数をSceneLoaderに投げる
   init = ->
     loader = new THREE.SceneLoader()
     loader.parse(modelJSON, createScene, texturePath)
@@ -96,11 +105,17 @@ $ ->
     scene.scene.children.splice(0, 1)
     scene.scene.add(mesh)
     
-    # y軸を上にしたいので回転させる
+    # マウスピッキング移動用に平面オブジェクトを作成
+    plane = new THREE.Mesh( new THREE.PlaneGeometry( 2000, 2000, 8, 8 ),
+      new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) )
+    #plane.visible = false
+    scene.scene.add( plane )
+    
+    # y軸を上にしたいので、scene内のオブジェクトを全て回転させる
     #for (i=0 i < scene.scene.children.length i++) {
     for i in scene.scene.children
-      console.log(i.rotation)
-      console.log(i.rotation.y)
+      #console.log(i.rotation)
+      #console.log(i.rotation.y)
       #scene.scene.children[i].rotation.y = -90 * Math.PI / 180
       i.rotation.x = -90 * Math.PI / 180
 
@@ -108,90 +123,167 @@ $ ->
     animate()
   
 
+  # ロード開始
   init()
+  
+  
   # マウスイベント追加
   $(document).on "mousedown", (event) ->
+    # Camera control
     isMouseDown = true
-    onMouseDownTheta = theta
-    onMouseDownPhi = phi
-    onMouseDownPosition.x = event.originalEvent.clientX
-    onMouseDownPosition.y = event.originalEvent.clientY
-    scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
-
-  $(document).on "mouseup", (event) ->
-    isMouseDown = false
-    onMouseDownPosition.x = event.originalEvent.clientX - onMouseDownPosition.x
-    onMouseDownPosition.y = event.originalEvent.clientY - onMouseDownPosition.y
+    if enableControl
+      onMouseDownTheta = theta
+      onMouseDownPhi = phi
+      onMouseDownPosition.x = event.originalEvent.clientX
+      onMouseDownPosition.y = event.originalEvent.clientY
+      scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
     
-    if onMouseDownPosition.length() > 5
-      return
-    #animate()
-    scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
+    
+    # Picking ray detection
+    rect = event.originalEvent.target.getBoundingClientRect()
+    # マウス位置(2D)
+    mouseX = event.originalEvent.clientX - rect.left
+    mouseY = event.originalEvent.clientY - rect.top
+    # マウス位置(3D)
+    mouseX = (mouseX / canvasSize.x) * 2 - 1
+    mouseY =-(mouseY / canvasSize.y) * 2 + 1
+    # マウスベクトル
+    vector = new THREE.Vector3(mouseX, mouseY, 1)
+    projector.unprojectVector( vector, scene.camera )
+    raycaster = new THREE.Raycaster( scene.camera.position,
+      vector.sub( scene.camera.position ).normalize() )
+    intersects = raycaster.intersectObjects(modelObjects)
+
+    #console.log(vector)
+    #console.log(modelObjects)
+    console.log(intersects)
+    
+    # 何かと交差していたら、対象を選択中のオブジェクトとしてSELECTEDへ保存する
+    if intersects.length > 0
+      enableControl = false
+      intersects[0].object.material.color.setHex( Math.random() * 0xffffff )
+      SELECTED = intersects[0].object
+      console.log(SELECTED)
+      # from sample
+      intersects = raycaster.intersectObject( plane )
+      offset.copy( intersects[0].point ).sub( plane.position )
+    
+  
+  $(document).on "mouseup", (event) ->
+    event.preventDefault()
+    console.log("mouseup")
+    console.log(INTERSECTED)
+    
+    # Mouse picking
+    if INTERSECTED
+      plane.position.copy( INTERSECTED.position )
+      SELECTED = null
+      console.log("none is selected.")
+      
+    # Camera control
+    isMouseDown = false
+    enableControl = true
+    if enableControl
+      onMouseDownPosition.x = event.originalEvent.clientX - onMouseDownPosition.x
+      onMouseDownPosition.y = event.originalEvent.clientY - onMouseDownPosition.y
+      if onMouseDownPosition.length() > 5
+        return
+      scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
 
   $(document).on "mousemove", (event) ->
+    # Camera control
     event.preventDefault()
-    if isMouseDown
-      # 長い計算式はJavascriptの方が見やすいと判断した（式の途中で改行出来るという点で）
-      `
-      theta = - ( ( event.originalEvent.clientX - onMouseDownPosition.x ) * 0.5 )
-              + onMouseDownTheta;
-      phi = ( ( event.originalEvent.clientY - onMouseDownPosition.y ) * 0.5 )
-            + onMouseDownPhi;
-      phi = Math.min( 180, Math.max( 0, phi ) );
-
-      scene.camera.position.x = radious * Math.sin( theta * Math.PI / 360 )
-                          * Math.cos( phi * Math.PI / 360 );
-      scene.camera.position.y = radious * Math.sin( phi * Math.PI / 360 );
-      scene.camera.position.z = radious * Math.cos( theta * Math.PI / 360 )
-                          * Math.cos( phi * Math.PI / 360 );
-      scene.camera.updateMatrix();
-      `
-
-    mouse3D = projector.unprojectVector(
-      new THREE.Vector3(
-          ( event.originalEvent.clientX / renderer.domElement.width ) * 2 - 1,
-          - ( event.originalEvent.clientY / renderer.domElement.height ) * 2 + 1,
-          0.5
-      ),
-      scene.camera
-    )
-    #ray.direction = mouse3D.subSelf( scene.camera.position ).normalize()
-    ray.direction = mouse3D.sub( scene.camera.position ).normalize()
+    # オブジェクトが選択されている時は動かさない
+    if enableControl
+      if isMouseDown
+        # 長い計算式はJavascriptの方が見やすいと判断した（式の途中で改行出来るという点で）
+        `
+        theta = - ( ( event.originalEvent.clientX - onMouseDownPosition.x ) * 0.5 )
+                + onMouseDownTheta
+        phi = ( ( event.originalEvent.clientY - onMouseDownPosition.y ) * 0.5 )
+              + onMouseDownPhi
+        phi = Math.min( 180, Math.max( 0, phi ) )
+  
+        scene.camera.position.x = radious * Math.sin( theta * Math.PI / 360 )
+                            * Math.cos( phi * Math.PI / 360 )
+        scene.camera.position.y = radious * Math.sin( phi * Math.PI / 360 )
+        scene.camera.position.z = radious * Math.cos( theta * Math.PI / 360 )
+                            * Math.cos( phi * Math.PI / 360 )
+        scene.camera.updateMatrix()
+        `
+      
+      mouse3D = projector.unprojectVector(
+        new THREE.Vector3(
+            ( event.originalEvent.clientX / renderer.domElement.width ) * 2 - 1,
+            - ( event.originalEvent.clientY / renderer.domElement.height ) * 2 + 1,
+            0.5
+        ),
+        scene.camera
+      )
+      #ray.direction = mouse3D.subSelf( scene.camera.position ).normalize()
+      ray.direction = mouse3D.sub( scene.camera.position ).normalize()
+      #render()
+      scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
     
-    #render()
-    scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
+    
+    # Dragging objects
+    #mouseX = ( event.clientX / window.innerWidth ) * 2 - 1
+    #mouseY = - ( event.clientY / window.innerHeight ) * 2 + 1
+    rect = event.target.getBoundingClientRect()
+    # マウス位置(2D)
+    mouseX = event.clientX - rect.left
+    mouseY = event.clientY - rect.top
+    # マウス位置(3D)
+    mouseX = (mouseX / canvasSize.x) * 2 - 1
+    mouseY =-(mouseY / canvasSize.y) * 2 + 1
+    
+    vector = new THREE.Vector3( mouseX, mouseY, 0.5 )
+    projector.unprojectVector( vector, scene.camera )
+    raycaster = new THREE.Raycaster( scene.camera.position, vector.sub( scene.camera.position ).normalize() )
+    if SELECTED
+      # planeはカメラ方向を向かせているので絶対交差するはず
+      intersects = raycaster.intersectObject( plane )
+      SELECTED.position.copy( intersects[0].point.sub( offset ) )
+      return
+      
+    intersects = raycaster.intersectObjects( modelObjects )
+    if intersects.length > 0 
+      if INTERSECTED != intersects[0].object
+        if INTERSECTED
+          INTERSECTED.material.color.setHex( INTERSECTED.currentHex )
+
+        INTERSECTED = intersects[0].object
+        INTERSECTED.currentHex = INTERSECTED.material.color.getHex()
+        plane.position.copy( INTERSECTED.position )
+        plane.lookAt( scene.camera.position )
+    else
+      if INTERSECTED
+        INTERSECTED.material.color.setHex( INTERSECTED.currentHex )
+      INTERSECTED = null
+      #container.style.cursor = 'auto'
+
 
   $(document).on "mousewheel", (event) ->
-    ###
-    fov -= event.wheelDeltaY * 0.05
-      scene.camera.projectionMatrix = (
-        new THREE.Matrix4()).makePerspective( fov, 500 / 500, 1, 1100 )
-    ###
-    radious -= event.originalEvent.wheelDeltaY
-    
-    #console.log("wheeled mouse.")
-    #console.log(scene.camera.position.x)
-    scene.camera.position.x = radious * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
-    scene.camera.position.y = radious * Math.sin( phi * Math.PI / 360 )
-    scene.camera.position.z = radious * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
-    scene.camera.updateMatrix()
-    #console.log(scene.camera.position.x)
-    #console.log(radious * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360))
-
+    if enableControl
+      radious -= event.originalEvent.wheelDeltaY
+      scene.camera.position.x = radious * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
+      scene.camera.position.y = radious * Math.sin( phi * Math.PI / 360 )
+      scene.camera.position.z = radious * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
+      scene.camera.updateMatrix()
   
   
   # モデルをシーンに追加する
   addModel = (event) ->
-    console.log("test")
     if selectedModelLoaded
-      
-      newMesh = new THREE.Mesh( selectedModelMesh.geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ))
+      newMesh = new THREE.Mesh( selectedModelMesh.geometry,
+        new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ))
       
       newMesh.scale = new THREE.Vector3(10, 10, 10)
       newMesh.position = new THREE.Vector3(Math.random() * 100, Math.random() * 100, Math.random() * 100)
       #scene.scene.add(selectedModelMesh)
       scene.scene.add(newMesh)
-      console.log(newMesh)
+      modelObjects.push(newMesh)  # 判定用に使用する、モデルのみを入れる配列
+      #console.log(newMesh)
       getModelTransforms()
 
   # モデルの位置データをViewのフォームに入力する
@@ -207,7 +299,8 @@ $ ->
       $("#transforms_field").val(JSON.stringify(positions))
       #$("#stage_field").val(JSON.stringify(modelJSON))
     
-  $('body').on('click', addModel)
+  #$('body').on('click', addModel)
+  $("body").keypress(addModel)  # space bar押下時に変更
   $('body').on('dblclick', insertTransforms)
 
   
@@ -232,8 +325,7 @@ $ ->
       
       if scene.scene.children[i] instanceof THREE.Mesh
       #if (typeof(scene.scene.children[i]) == THREE.Mesh) {
-        console.log(scene.scene.children[i])
-        #array = []
+        #console.log(scene.scene.children[i])
         s = JSON.stringify(scene.scene.children[i].position.toArray())
         array.push(s)
       
@@ -244,7 +336,7 @@ $ ->
     console.log(scene.objects)
     console.log(scene.scene.children)
     console.log("begin ajax request.")
-    ###
+    ### 未移植
     $.ajax({
       url: 'ready',
       type: 'POST',
@@ -269,7 +361,8 @@ $ ->
     # 更新処理
     stats.update()
     #controls.update()
-    $debugText.html("" + scene.camera.position.x.toString() + " "
+    ###$debugText.text("" + scene.camera.position.x.toString() + " "
       + scene.camera.position.y.toString() + " "
-      + scene.camera.position.z.toString())
+      + scene.camera.position.z.toString())###
+    $debugText.text(INTERSECTED)
   
