@@ -4,7 +4,7 @@ class StyledStats
   constructor: () ->
     stats = new Stats()
     stats.domElement.style.position = 'absolute'
-    stats.domElement.style.top = '0px'
+    stats.domElement.style.top = '200px'
     stats.domElement.style.left= '500px'
     stats.domElement.style.zIndex = 100
     $('body').append(stats.domElement)

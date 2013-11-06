@@ -34,8 +34,8 @@ class CreateDiorama
   mouseX = undefined
   mouseY = undefined
   modelObjects = new Array()
-  SELECTED = undefined        # マウスで選択されたオブジェクトを格納する
-  INTERSECTED = undefined
+  isSelected = undefined        # マウスで選択されたオブジェクトを格納する
+  isIntersected = undefined
   plane = undefined           # マウスでオブジェクトを移動する際に使用する平面オブジェクト。不可視
   offset = new THREE.Vector3()
   
@@ -74,7 +74,8 @@ class CreateDiorama
     #debugText = document.createElement('div')
     $debugText = $('<div>')
     $debugText.addClass('debugText')
-    $debugText.html("camera position:")
+    $debugText.text("camera position:")
+    $debugText.css({top: 200, left: 200, position:'absolute'});
     #document.body.appendChild(text2)
     $('body').append($debugText)
     
@@ -165,12 +166,12 @@ class CreateDiorama
       #console.log(modelObjects)
       console.log(intersects)
       
-      # 何かと交差していたら、対象を選択中のオブジェクトとしてSELECTEDへ保存する
+      # 何かと交差していたら、対象を選択中のオブジェクトとしてisSelectedへ保存する
       if intersects.length > 0
         enableControl = false
         intersects[0].object.material.color.setHex( Math.random() * 0xffffff )
-        SELECTED = intersects[0].object
-        console.log(SELECTED)
+        isSelected = intersects[0].object
+        console.log(isSelected)
         # from sample
         intersects = raycaster.intersectObject( plane )
         offset.copy( intersects[0].point ).sub( plane.position )
@@ -179,12 +180,12 @@ class CreateDiorama
     $(document).on "mouseup", (event) ->
       event.preventDefault()
       console.log("mouseup")
-      console.log(INTERSECTED)
+      console.log(isIntersected)
       
       # Mouse picking
-      if INTERSECTED
-        plane.position.copy( INTERSECTED.position )
-        SELECTED = null
+      if isIntersected
+        plane.position.copy( isIntersected.position )
+        isSelected = null
         console.log("none is selected.")
         
       # Camera control
@@ -241,27 +242,27 @@ class CreateDiorama
       vector = new THREE.Vector3( mouseX, mouseY, 0.5 )
       projector.unprojectVector( vector, scene.camera )
       raycaster = new THREE.Raycaster( scene.camera.position, vector.sub( scene.camera.position ).normalize() )
-      if SELECTED
+      if isSelected
         # planeはカメラ方向を向かせているので絶対交差するはず
         intersects = raycaster.intersectObject( plane )
-        SELECTED.position.copy( intersects[0].point.sub( offset ) )
+        isSelected.position.copy( intersects[0].point.sub( offset ) )
         return
         
       intersects = raycaster.intersectObjects( modelObjects )
       if intersects.length > 0
-        if INTERSECTED != intersects[0].object
-          if INTERSECTED
-            INTERSECTED.material.color.setHex( INTERSECTED.currentHex )
+        if isIntersected isnt intersects[0].object
+          if isIntersected
+            isIntersected.material.color.setHex( isIntersected.currentHex )
   
-          INTERSECTED = intersects[0].object
-          INTERSECTED.currentHex = INTERSECTED.material.color.getHex()
+          isIntersected = intersects[0].object
+          isIntersected.currentHex = isIntersected.material.color.getHex()
           # オブジェクトを動かす基準にする平面を、カメラの方へ向ける（並行に置く）
-          plane.position.copy( INTERSECTED.position )
+          plane.position.copy( isIntersected.position )
           plane.lookAt( scene.camera.position )
       else
-        if INTERSECTED
-          INTERSECTED.material.color.setHex( INTERSECTED.currentHex )
-        INTERSECTED = null
+        if isIntersected
+          isIntersected.material.color.setHex( isIntersected.currentHex )
+        isIntersected = null
         #container.style.cursor = 'auto'
   
   
@@ -276,9 +277,12 @@ class CreateDiorama
   # 内包表記用の関数[未使用]
   stringifyArray = (index) ->
     if scene.scene.children[index] instanceof THREE.Mesh
-      #if (typeof(scene.scene.children[i]) == THREE.Mesh) {
+      #if (typeof(scene.scene.children[i]) is THREE.Mesh) {
       #console.log(scene.scene.children[i])
       return JSON.stringify(scene.scene.children[index].position.toArray())
+  
+  stringify = (value) ->
+    JSON.stringify(value.position.toArray())
   
   # 配置されたモデルの位置を取得しarrayに格納して返す
   getModelTransforms= () ->
@@ -287,15 +291,14 @@ class CreateDiorama
     console.log(array)
     return array###
     
+    ###
     array = []
-    #while i < scene.scene.children.length
     for value, index in scene.scene.children
-      #console.log(index)
       if scene.scene.children[index] instanceof THREE.Mesh
-      #if (typeof(scene.scene.children[i]) == THREE.Mesh) {
-        #console.log(scene.scene.children[i])
         s = JSON.stringify(scene.scene.children[index].position.toArray())
         array.push(s)
+    ###
+    array = (stringify(value) for value in scene.scene.children when value instanceof THREE.Mesh)
     return array
 
 
@@ -357,6 +360,6 @@ class CreateDiorama
     stats.update()
     #controls.update()
     $debugText.text("#{scene.camera.position.x} #{scene.camera.position.y} #{scene.camera.position.z}")
-    #$debugText.text(INTERSECTED)
+    #$debugText.text(isIntersected)
 
-window.CreateDiorama = window.CreateDiorama || CreateDiorama
+window.CreateDiorama = window.CreateDiorama or CreateDiorama

@@ -4,12 +4,17 @@
 
 #site-box {  width: 1200px;  }
 #left-box {
-  width: 600px;
-  float:left;
-  margin-right:70px;
+  width: 1024px;
+  float: left;
+  margin-right:64px;
+}
+#modelSelection {
+  width: 256px;
+  float: left;
+  margin-right:32px;
 }
 #right-box {
-  float:right;
+  float: right;
 }
 .debugText {
   position: absolute;

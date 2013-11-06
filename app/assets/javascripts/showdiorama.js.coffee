@@ -45,18 +45,12 @@ $ ->
     console.log("texturePath variable:\n" + texturePath)
     loader = new THREE.SceneLoader()
     loader.parse(modelJSON, createScene, texturePath)
-    
     # sceneが格納されるより先に実行されてしまうのでcreateScene内で実行する
     #loader.parse(selectedModel, callBack, '')
 
-  callBack = (result) ->
-    console.log("model callback called.")
-  
-    selectedModelMesh = result.scene.children[0]
-    selectedModelLoaded = true
-  
+  insertModel = () ->
     console.log("positions:")
-    console.log(modelTransforms)
+    console.log(modelTransforms)# rails側から与えられるグローバル
   
     # Convert JSON to array
     positions = []
@@ -67,23 +61,40 @@ $ ->
     console.log(positions)
   
     # modelTransformsで与えられる位置に配置する 
-    i = 0
-    #for (i=0 i < positions.length i++) {
-    while i < positions.length
+    #i = 0
+    #while i < positions.length
+    for value in positions
       newMesh = new THREE.Mesh( selectedModelMesh.geometry,
         new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ))
       newMesh.scale = new THREE.Vector3(10, 10, 10)
       
-      #console.log(positions[i])
-      pos = new THREE.Vector3().fromArray(positions[i])
+      #pos = new THREE.Vector3().fromArray(positions[i])
+      pos = new THREE.Vector3().fromArray(value)
       console.log(pos)
+      
       newMesh.position = pos
       scene.scene.add(newMesh)
       modelObjects.push(newMesh)  # 判定用に使用する、モデルのみを入れる配列
-      
-      i++
+      #i++
     
     console.log(scene)
+
+
+  # モデルデータを格納するためのコールバック
+  callBack = (result) ->
+    console.log("model callback called.")
+  
+    selectedModelMesh = result.scene.children[0]
+    selectedModelLoaded = true
+    insertModel()
+    # jQuery reffered
+    #queが空になってからinserModelする
+    # マウスイベントはViewの範疇
+    # 通信とかはCOntroler, dataのfetch
+    # モデルはデータを持たせておくだけ
+    # scene追加、イベント追加がview
+    # 
+    
   
   createScene = (result) ->
     console.log("callback called.")
@@ -93,7 +104,13 @@ $ ->
     
     # Modelのparse開始
     loader = new THREE.SceneLoader()
-    loader.parse(selectedModel, callBack, '')
+    #loader.parse(selectedModel, (callBack), '')
+    loader.parse(selectedModel, (result) ->
+      console.log("model callback called.")
+      selectedModelMesh = result.scene.children[0]
+      selectedModelLoaded = true
+      insertModel()
+    , '')
     
     
     # set stats
@@ -154,8 +171,7 @@ $ ->
       console.log(i.rotation.y)
       #scene.scene.children[i].rotation.y = -90 * Math.PI / 180
       i.rotation.x = -90 * Math.PI / 180
-      
-      
+
     # 描画
     animate()
 
@@ -228,9 +244,9 @@ $ ->
 
     mouse3D = projector.unprojectVector(
       new THREE.Vector3(
-          ( event.originalEvent.clientX / renderer.domElement.width ) * 2 - 1,
-          - ( event.originalEvent.clientY / renderer.domElement.height ) * 2 + 1,
-          0.5
+        ( event.originalEvent.clientX / renderer.domElement.width ) * 2 - 1,
+        - ( event.originalEvent.clientY / renderer.domElement.height ) * 2 + 1,
+        0.5
       ),
       scene.camera
     )
@@ -300,24 +316,24 @@ $ ->
     ###
   insertTransforms = (event) ->
     console.log("inserting transforms to form.")
-    positions = getModelTransforms
+    positions = getModelTransforms()
     $(document).ready () ->
       $("#transforms_field").val(JSON.stringify(positions))
   
 
   # 描画関連
   render = ->
-      requestAnimationFrame(render)
-      renderer.render(scene, scene.camera)
+    requestAnimationFrame(render)
+    renderer.render(scene, scene.camera)
   
   # meshを動かした後renderする関数
   animate = ->
-      requestAnimationFrame( animate )
-      renderer.render(scene.scene, scene.camera)
-      
-       # 更新処理
-      stats.update()
-      #controls.update()
+    requestAnimationFrame( animate )
+    renderer.render(scene.scene, scene.camera)
+    
+     # 更新処理
+    stats.update()
+    #controls.update()
     $debugText.text("" + scene.camera.position.x.toString() + " "
       + scene.camera.position.y.toString() + " "
       + scene.camera.position.z.toString())
