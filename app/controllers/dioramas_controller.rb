@@ -75,6 +75,32 @@ class DioramasController < ApplicationController
     p(@trans.transform)
   end
   
+  def findModel
+    p("findModel action was called.")
+    p(params[:id])
+    
+    @diorama = Diorama.new
+    @model_data = ModelDatum.all
+    @stages = Stage.all
+    @selectedStage = Stage.find(4)
+    @selectedModel = ModelDatum.find(params[:id])
+    @selectedStageTextures = @selectedStage.textures[0]
+    @selectedModelTextures = @selectedModel.textures[0]
+    session[:stage_id] = 4
+    session[:model_id] = params[:id]
+    p(@selectedModelTextures.data.url)
+      
+    render :action => "new"
+    
+=begin
+    @selectedModel = ModelDatum.find(37)
+       @selectedStage = Stage.find(4)
+       @selectedModelTextures = @selectedModel.textures[0]
+       @selectedStageTextures = @selectedStage.textures[0]
+=end
+  end
+  
+  
   # POST /dioramas
   # POST /dioramas.json
   def create

@@ -4,6 +4,7 @@ Model::Application.routes.draw do
   resources :model_data
   resources :stages
   post 'dioramas/ready'
+  post 'dioramas/findModel'
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

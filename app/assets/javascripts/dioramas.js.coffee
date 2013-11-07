@@ -388,9 +388,19 @@ class DioramaController
         #dioramaModel.setModelDatum(result.scene.children[0])
         dioramaModel.setModelDatum.call(this, result.scene.children[0])
         deferred.resolve()
-    , '')
+    , modelTexturePath)
     return deferred.promise()
 
+  # modelDatumをモデルにセットし直す
+  reloadModelDatum : (data, path) ->
+    loader = new THREE.SceneLoader()
+    loader.parse(data, (result) ->
+        console.log("modelDatum callback function has been called.")
+        dioramaModel.setModelDatum.call(this, result.scene.children[0])
+        #deferred.resolve()
+        console.log(path)
+    , path)
+   
   
   # canvasの描画を開始する
   draw = () ->
@@ -441,7 +451,9 @@ class DioramaController
     
     # 取得したデータからMesh生成
     newMesh = new THREE.Mesh( selectedModelMesh.geometry,
-      new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ))
+      #new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ))
+      #new THREE.MeshLambertMaterial())
+      selectedModelMesh.material)
     newMesh.scale = new THREE.Vector3(10, 10, 10)
     newMesh.position = new THREE.Vector3(Math.random() * 100, Math.random() * 100, Math.random() * 100)
 
@@ -464,7 +476,9 @@ class DioramaController
     # modelTransformsで与えられる位置に配置する 
     for value in positions
       newMesh = new THREE.Mesh( selectedModelMesh.geometry,
-        new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ))
+        #new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ))
+        #new THREE.MeshLambertMaterial())
+        selectedModelMesh.material)
       newMesh.scale = new THREE.Vector3(10, 10, 10)
       
       #pos = new THREE.Vector3().fromArray(positions[i])

@@ -15,19 +15,23 @@
 		<% else %>
 			window.texturePath = "";
 		<% end %>
+		<% unless @selectedModel.textures.empty? %>
+			window.modelTexturePath = "<%= @selectedModelTextures.data.url %>";
+		<% else %>
+			window.modelTexturePath = "";
+		<% end %>
 	<% end %>
 	<%= javascript_include_tag "three", "stats.min", "styledstats", "dioramas", "main_creatediorama", "OrbitControls", "EditorControls", "TrackballControls" %>
 </div>
 <!-- とりあえず表示しているだけ -->
-<div id = "modelSelection">
+<div id = "modelSelectionParent">
 	<h2>ModelData:</h2>
 	
 	<div id = "modelSelection">
 		<% @model_data.each do |model_datum| %>
-		  	<div>
-			    <td><%= model_datum.id %></td>	<td><%= model_datum.title %></td>
+		  	<div class = "item">
+			    <%= model_datum.id %>
 	  		</div>
 		<% end %>
 	</div>
-	
 </div>
