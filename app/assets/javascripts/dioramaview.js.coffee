@@ -29,7 +29,7 @@ class DioramaView
   radius = 1000
   theta = 45
   phi = 60
-  enableControl = true   # モデルが選択されている時はカメラ操作をオフにする。そのためのフラグ
+  enableControl = true          # モデルが選択されている時はカメラ操作をオフにする。そのためのフラグ
   
   # Mouse picking関係
   mouseX = undefined
@@ -40,10 +40,13 @@ class DioramaView
   plane = undefined             # マウスでオブジェクトを移動する際に使用する平面オブジェクト。不可視
   offset = new THREE.Vector3()
   
+  # コントローラへの参照
   dioramaController = undefined
   
+  
+  # コンストラクタ：
   # stageオブジェクトを受け取ってsceneを生成する
-  constructor: (controller, stageData) ->
+  constructor: (controller, stageData, enableControl) ->
     dioramaController = controller
     #scene = this.controller.get()
     scene = stageData
@@ -52,15 +55,14 @@ class DioramaView
     console.log(dioramaController)
     console.log(stageData)
     console.log(scene)
-    createScene()
     
-  # 既に設定されたsceneにいろいろ追加する
+    createScene()
+    addEvents.call(this, enableControl)
+    
+
+  # 既に設定されたsceneにいろいろ追加する、シーン生成関数
   createScene = () ->
     console.log("Creating scene...")
-    # (2)create scene
-    #console.log(result)
-    #scene = result
-
     # FPS表示用のインスタンス生成＆bodyに追加
     stats = new window.StyledStats()
 
@@ -68,7 +70,8 @@ class DioramaView
     camera = new THREE.PerspectiveCamera(15, canvasSize.x / canvasSize.y, 10, 100000)
     lookAtPos = new THREE.Vector3(camera.position.x + 1000,
       camera.position.y + 1000, 50)
-    #camera.position.set(0, 200, 0)
+    
+    # ToDo:ここの計算式を整理する
     camera.position.x = radius * Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
     camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
     camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
@@ -83,63 +86,44 @@ class DioramaView
     scene.scene.add(ambient)
     
     # draw debug info
-    #debugText = document.createElement('div')
     $debugText = $('<div>')
     $debugText.addClass('debugText')
     $debugText.text("camera position:")
     $debugText.css({top: 200, left: 200, position:'absolute'})
-    #document.body.appendChild(text2)
     $('body').append($debugText)
     
-    # 変数として持ちたいのでsceneから読み込んだ後再び追加
+    # mesh変数として持っておきたいのでsceneから読み込んだ後再び追加
     mesh = scene.scene.children[0]
     scene.scene.children.splice(0, 1)
     scene.scene.add(mesh)
     
-    # マウスピッキング移動用に平面オブジェクトを作成
+    # オブジェクト操作用に、平面オブジェクトを作成
     plane = new THREE.Mesh( new THREE.PlaneGeometry( 2000, 2000, 8, 8 ),
       new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) )
     #plane.visible = false
     scene.scene.add( plane )
     
     # y軸を上にしたいので、scene内のオブジェクトを全て回転させる
-    #for (i=0 i < scene.scene.children.length i++) {
     for i in scene.scene.children
-      #console.log(i.rotation)
-      #console.log(i.rotation.y)
-      #scene.scene.children[i].rotation.y = -90 * Math.PI / 180
       i.rotation.x = -90 * Math.PI / 180
-    
-    # マウスイベント等を追加
-    addEvents.call(this)
-    
-    # 描画
-    #animate.call(this)
 
-  # meshを動かした後renderする関数
+
+
+  # Render&Update関数
   animate: =>
-    # 描画処理
-    #console.log(@animate)
-    #console.log(this.animate)
+    # Render
     requestAnimationFrame( @animate )
     renderer.render(scene.scene, scene.camera)
       
-    # 更新処理
+    # Update
     stats.update()
     #controls.update()
     $debugText.text("#{scene.camera.position.x} #{scene.camera.position.y} #{scene.camera.position.z}")
     #$debugText.text(isIntersected)
     
   
-  
-  # マウスイベントを追加する
-  addEvents= (addControlEvents) ->
-    console.log("Adding events...")
-    console.log(dioramaController)
-    console.log(dioramaController.addModel)
-    $("body").keypress(dioramaController.addModel)
-    $('body').on('dblclick', dioramaController.insertTransforms)
-    
+  # カメラ操作関連のイベントを追加する
+  addCameraEvents= () ->
     $(document).on "mousedown", (event) ->
       # Camera control
       isMouseDown = true
@@ -149,8 +133,59 @@ class DioramaView
         onMouseDownPosition.x = event.originalEvent.clientX
         onMouseDownPosition.y = event.originalEvent.clientY
         scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
-      
-      
+        
+    $(document).on "mouseup", (event) ->
+      # Camera control
+      isMouseDown = false
+      enableControl = true
+      if enableControl
+        onMouseDownPosition.x = event.originalEvent.clientX - onMouseDownPosition.x
+        onMouseDownPosition.y = event.originalEvent.clientY - onMouseDownPosition.y
+        return if onMouseDownPosition.length() > 5
+        scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
+    
+    $(document).on "mousemove", (event) ->
+      # Camera control
+      # オブジェクトが選択されている時は動かさない
+      if enableControl
+        if isMouseDown
+          theta = - ( ( event.originalEvent.clientX - onMouseDownPosition.x ) * 0.5 ) +
+                  onMouseDownTheta
+          phi = ( ( event.originalEvent.clientY - onMouseDownPosition.y ) * 0.5 ) +
+                onMouseDownPhi
+          phi = Math.min( 180, Math.max( 0, phi ) )
+    
+          scene.camera.position.x = radius * Math.sin( theta * Math.PI / 360 ) *
+                              Math.cos( phi * Math.PI / 360 )
+          scene.camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
+          scene.camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) *
+                              Math.cos( phi * Math.PI / 360 )
+          scene.camera.updateMatrix()
+        mouse3D = projector.unprojectVector(
+          new THREE.Vector3(
+              ( event.originalEvent.clientX / renderer.domElement.width ) * 2 - 1,
+              - ( event.originalEvent.clientY / renderer.domElement.height ) * 2 + 1,
+              0.5
+          ),
+          scene.camera
+        )
+        #ray.direction = mouse3D.subSelf( scene.camera.position ).normalize()
+        ray.direction = mouse3D.sub( scene.camera.position ).normalize()
+        #render()
+        scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
+
+    $(document).on "mousewheel", (event) ->
+      if enableControl
+        radius -= event.originalEvent.wheelDeltaY
+        scene.camera.position.x = radius * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
+        scene.camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
+        scene.camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
+        scene.camera.updateMatrix()
+        
+    
+  # モデル追加・操作関連のイベントを追加する
+  addModelEvents= () ->
+    $(document).on "mousedown", (event) ->  
       # Picking ray detection
       rect = event.originalEvent.target.getBoundingClientRect()
       # マウス位置(2D)
@@ -179,10 +214,9 @@ class DioramaView
         # from sample
         intersects = raycaster.intersectObject( plane )
         offset.copy( intersects[0].point ).sub( plane.position )
-      
-    
+        
+        
     $(document).on "mouseup", (event) ->
-      event.preventDefault()
       console.log("mouseup")
       console.log(isIntersected)
       
@@ -192,47 +226,7 @@ class DioramaView
         isSelected = null
         console.log("none is selected.")
         
-      # Camera control
-      isMouseDown = false
-      enableControl = true
-      if enableControl
-        onMouseDownPosition.x = event.originalEvent.clientX - onMouseDownPosition.x
-        onMouseDownPosition.y = event.originalEvent.clientY - onMouseDownPosition.y
-        return if onMouseDownPosition.length() > 5
-        scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
-  
     $(document).on "mousemove", (event) ->
-      # Camera control
-      event.preventDefault()
-      # オブジェクトが選択されている時は動かさない
-      if enableControl
-        if isMouseDown
-          theta = - ( ( event.originalEvent.clientX - onMouseDownPosition.x ) * 0.5 ) +
-                  onMouseDownTheta
-          phi = ( ( event.originalEvent.clientY - onMouseDownPosition.y ) * 0.5 ) +
-                onMouseDownPhi
-          phi = Math.min( 180, Math.max( 0, phi ) )
-    
-          scene.camera.position.x = radius * Math.sin( theta * Math.PI / 360 ) *
-                              Math.cos( phi * Math.PI / 360 )
-          scene.camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
-          scene.camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) *
-                              Math.cos( phi * Math.PI / 360 )
-          scene.camera.updateMatrix()
-        mouse3D = projector.unprojectVector(
-          new THREE.Vector3(
-              ( event.originalEvent.clientX / renderer.domElement.width ) * 2 - 1,
-              - ( event.originalEvent.clientY / renderer.domElement.height ) * 2 + 1,
-              0.5
-          ),
-          scene.camera
-        )
-        #ray.direction = mouse3D.subSelf( scene.camera.position ).normalize()
-        ray.direction = mouse3D.sub( scene.camera.position ).normalize()
-        #render()
-        scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
-      
-      
       # Dragging objects
       rect = event.target.getBoundingClientRect()
       # マウス位置(2D)
@@ -267,16 +261,23 @@ class DioramaView
           isIntersected.material.color.setHex( isIntersected.currentHex )
         isIntersected = null
         #container.style.cursor = 'auto'
-  
-  
-    $(document).on "mousewheel", (event) ->
-      if enableControl
-        radius -= event.originalEvent.wheelDeltaY
-        scene.camera.position.x = radius * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
-        scene.camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
-        scene.camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
-        scene.camera.updateMatrix()
         
+    $("body").keypress(dioramaController.addModel)
+    $('body').on('dblclick', dioramaController.insertTransforms)
+        
+    
+  # マウスイベントを追加する
+  addEvents= (addControlEvents) ->
+    console.log("Adding events...")
+    console.log(dioramaController)
+    console.log(dioramaController.addModel)
+    
+    addCameraEvents.call(this)
+    if addControlEvents
+      addModelEvents.call(this)
+        
+  
+  # シーンにあるオブジェクトのやりとり
   addModelToScene: (newMesh) ->
     scene.scene.add(newMesh)
     modelObjects.push(newMesh)

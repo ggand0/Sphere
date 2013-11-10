@@ -23,12 +23,11 @@ class DioramaController
       # 次に個々のモデルを読む（とりあえず今は１つだけ）
       console.log("Begin loading modelDatum...")
       loadModelDatum.call(this).then(()->
-        # 最後にデータをViewに渡してscene生成
         console.log("Creating view object...")
-        console.log(self)
-        #console.log(dioramaModel)
-        #console.log(dioramaModel.stageData)
-        dioramaView = new DioramaView(self, dioramaModel.stageData)
+        
+        # 最後にデータをViewに渡してscene生成
+        # createなのでモデル追加関連のイベントを追加する
+        dioramaView = new DioramaView(self, dioramaModel.stageData, true)
         
         # 描画開始
         draw.call(this)
@@ -74,19 +73,19 @@ class DioramaController
     # railsで与えられたarray分だけロード[要改善]
     for datum, index in modelDataObj
       loader.parse(datum, (result) ->
-          console.log("modelData callback function has been called. " + index)
+          console.log("modelData callback function has been called. " + loadIndex)
           loadIndex += 1# メンバ変数のカウンタを使うことにする
           
           # sceneで返ってくるのでchildrenを取得
           #dioramaModel.setModelData.call(this, result.scene.children[0], selectedModelId)# idも要修正
-          dioramaModel.addModelDatum.call(this, result.scene.children[0], 0)# idも要修正
+          dioramaModel.addModelDatum.call(this, result.scene.children[0], 0)# id要修正
           console.log(dioramaModel.getModelData())
           
           # 最後まで読まれたらresolve
           #if index >= modelDataObj.length-1# ここでindex参照して条件に使っても意味NEEE
           if loadIndex >= modelDataObj.length
             deferred.resolve()
-            console.log("resolved.")
+            console.log("loadModelData method has resolved.")
       , textures[index])
     return deferred.promise()
 
@@ -118,13 +117,12 @@ class DioramaController
       # 次に個々のモデルを読む（とりあえず今は１つだけ）
       console.log("Begin loading modelDatum...")
       loadModelData.call(this).then(()->
-        console.log("Inserting models...")
-        
-        
-        # 最後にデータをViewに渡してscene生成
         console.log("Creating view object...")
-        dioramaView = new DioramaView(self, dioramaModel.stageData)
+        # 最後にデータをViewに渡してscene生成
+        # showなのでモデル操作は禁止
+        dioramaView = new DioramaView(self, dioramaModel.stageData, false)
         
+        console.log("Inserting models...")
         insertModels.call(this)
         
         # 描画開始
