@@ -27,7 +27,7 @@ class DioramasController < ApplicationController
     for model_datum in @diorama.model_datum do
       @ids << model_datum.id
       @modelData << model_datum.modeldata
-      @textures << model_datum.textures[0] 
+      @textures << model_datum.textures[0]
     end
   end
 

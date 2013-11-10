@@ -169,32 +169,80 @@ class DioramaController
     array = []
 
 
+
+  handleKeyEvents: (event) =>
+    console.log("keyCode = " + event.keyCode)
+    if event.keyCode is 100           # Dキー
+      deleteModel.call(this)
+    else if event.keyCode is 115      # Sキー
+      console.log(getSelectedModels.call(this))
+    else if event.keyCode is 99      # Cキー
+      console.log(dioramaModel.getModelData())
+    else
+      addModel.call(this, event)
+
+  getSelectedModels = () ->
+    array = (obj for obj in dioramaView.getSceneObjects() when obj.userData['selected'] is true)
+    return array
+
+  # モデルをSceneとmodelDataから削除する
+  deleteModel = () =>
+    console.log("Deleting models...")
+    # 選択されているモデルを削除
+    # 選択されていないモデルだけ残してセットし直す
+    #array = (obj for obj in dioramaView.getSceneObjects() when obj.userData['selected'] isnt true)
+    ###
+    array = dioramaView.getSceneObjects().filter (obj) -> obj.userData['selected'] isnt true
+    console.log(array)
+    dioramaView.setSceneObjects(array)
+    ###
+    array = getSelectedModels()
+    #dioramaView.removeModel(array[0])
+    dioramaView.removeModels(array)
+        
+    # modelData側でも同様に消す、もう少し効率良くしたい
+    #dioramaModel.setModelData(dioramaView.getSceneObjects())
+    dioramaModel.removeModels(array)
+
   # モデルをジオラマのシーンに追加する
-  addModel: (event) =>
-    # モデルがロードされていない場合return
-    #return unless selectedModelLoaded
-    
+  addModel = () =>
     # モデルデータをModelから取得する
+    ###
     selectedModelMesh = dioramaModel.getModelDatum().data
+    console.log(selectedModelMesh)
     
     # 取得したデータからMesh生成
     newMesh = new THREE.Mesh( selectedModelMesh.geometry,
-      #new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ))
-      #new THREE.MeshLambertMaterial())
       selectedModelMesh.material)
     newMesh.scale = new THREE.Vector3(10, 10, 10)
     newMesh.position = new THREE.Vector3(Math.random() * 100, Math.random() * 100, Math.random() * 100)
+    newMesh.userData = { selected: false }
+    ###
+    
+    
 
     # ToDo:dioramaViewがdioramaModelを参照してsceneを更新するようにする
     # 取得したモデルデータをViewが持っているsceneに追加する(Viewのメソッドを呼ぶ形にしたほうが良いかも)
+    #dioramaView.addModelToScene(newMesh)
+    
+    newMesh = dioramaModel.getModelDatum().meshData.clone()
+    newMesh.position = new THREE.Vector3(Math.random() * 100, Math.random() * 100, Math.random() * 100)
     dioramaView.addModelToScene(newMesh)
+    
     # Dioramaにも追加
-    newModel = new ModelData(selectedModelMesh, selectedModelId, newMesh.position)
+    selectedModelMesh = dioramaModel.getModelDatum()
+    
+    
+    #newModel = new ModelData(selectedModelMesh, selectedModelId, newMesh.position)
+    console.log(selectedModelMesh)
+    console.log(selectedModelMesh.meshData)
+    #newModel = new ModelData(selectedModelMesh.data, selectedModelId, selectedModelMesh.meshData.position)
+    newModel = new ModelData(selectedModelMesh.data, selectedModelId, newMesh.position)
     dioramaModel.addModelDatum(newModel)
     console.log(newModel)
   
+  
   # 既存のジオラマをshowする時に、modelTransformsで与えられた位置にモデルを配置する
-  #insertModel: () =>
   insertModels =  () =>
     console.log("positions:")
     console.log(modelTransforms)# rails側から指定するグローバル変数

@@ -210,6 +210,16 @@ class DioramaView
         enableControl = false
         intersects[0].object.material.color.setHex( Math.random() * 0xffffff )
         isSelected = intersects[0].object
+        
+        # 選択フラグを操作
+        for obj in scene.scene.children
+          if obj is isSelected
+            if obj.userData['selected'] is true
+              obj.userData = { selected: false }
+            else
+              obj.userData = { selected: true }
+        
+        
         console.log(isSelected)
         # from sample
         intersects = raycaster.intersectObject( plane )
@@ -253,6 +263,8 @@ class DioramaView
   
           isIntersected = intersects[0].object
           isIntersected.currentHex = isIntersected.material.color.getHex()
+          
+          
           # オブジェクトを動かす基準にする平面を、カメラの方へ向ける（並行に置く）
           plane.position.copy( isIntersected.position )
           plane.lookAt( scene.camera.position )
@@ -261,8 +273,10 @@ class DioramaView
           isIntersected.material.color.setHex( isIntersected.currentHex )
         isIntersected = null
         #container.style.cursor = 'auto'
-        
-    $("body").keypress(dioramaController.addModel)
+    
+    # その他のイベントを追加
+    #$("body").keypress(dioramaController.addModel)
+    $("body").keypress(dioramaController.handleKeyEvents)
     $('body').on('dblclick', dioramaController.insertTransforms)
         
     
@@ -281,8 +295,26 @@ class DioramaView
   addModelToScene: (newMesh) ->
     scene.scene.add(newMesh)
     modelObjects.push(newMesh)
-    
+  removeModel: (target) ->
+    for obj in scene.scene.children
+      if obj is target
+        scene.scene.remove(obj)
+  removeModels: (targets) ->
+    ###
+    dels = []
+    for obj in scene.scene.children
+      for t in targets
+        if obj is t
+          dels.push(obj)
+    ###
+    dels = (obj for obj in scene.scene.children when obj is t for t in targets)
+    console.log(dels)
+    for d in dels
+      scene.scene.remove(d[0])
+      
   getSceneObjects: () ->
     return scene.scene.children
+  setSceneObjects: (objects) ->
+    scene.scene.children = objects
 
 window.DioramaView = window.DioramaView or DioramaView
