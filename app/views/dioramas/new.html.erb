@@ -9,6 +9,7 @@
 	<%= javascript_tag do %>
 		window.modelJSON = <%= raw @selectedStage.scene_data %>
 		window.selectedModel = <%= raw @selectedModel.modeldata %>
+		window.selectedModelId = <%= raw @selectedModel.id %>
 		
 		<% unless @selectedStage.textures.empty? %>
 			window.texturePath = "<%= @selectedStageTextures.data.url %>";
@@ -21,7 +22,7 @@
 			window.modelTexturePath = "";
 		<% end %>
 	<% end %>
-	<%= javascript_include_tag "three", "stats.min", "styledstats", "dioramas", "main_creatediorama", "OrbitControls", "EditorControls", "TrackballControls" %>
+	<%= javascript_include_tag "three", "stats.min", "styledstats", "dioramas", "dioramacontroller", "dioramaview", "main_creatediorama", "OrbitControls", "EditorControls", "TrackballControls" %>
 </div>
 <!-- とりあえず表示しているだけ -->
 <div id = "modelSelectionParent">

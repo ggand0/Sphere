@@ -50,3 +50,12 @@ end
 
 # Use debugger
 # gem 'debugger', group: [:development, :test]
+
+# rails consoleを起動するために必要
+gem 'rb-readline', '~> 0.4.2'
+
+# pデバッグからの脱却
+group :development do
+  gem 'better_errors'
+  gem 'binding_of_caller'
+end

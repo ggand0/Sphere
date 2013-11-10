@@ -9,6 +9,18 @@
 	<%= javascript_tag do %>
 		window.modelJSON = <%= raw @diorama.stage.scene_data %>
 		window.modelTransforms = <%= raw @positions %>
+		window.modelIds = <%= raw @ids %>
+		window.modelData = <%= raw @modelData %>
+		
+		window.textures = []
+		<% for value in @textures %>
+			<% if value != nil %>
+				window.textures.push("<%= value.data.url %>")
+			<% else %>
+				window.textures.push("")
+			<% end %>
+		<% end %>
+		
 		window.selectedModel = <%= raw @selectedModel.modeldata %>
 		
 		<!-- If modeldata has at least one texture, set the path -->
@@ -19,7 +31,7 @@
 		<% end %>
 	<% end %>
 	
-	<%= javascript_include_tag "three", "stats.min", "showdiorama", "OrbitControls", "EditorControls", "TrackballControls", "dioramas" %><br>
+	<%= javascript_include_tag "three", "stats.min", "styledstats", "dioramas", "dioramacontroller", "dioramaview", "main_showdiorama", "OrbitControls", "EditorControls", "TrackballControls" %><br>
 </div>
 
 <%= link_to 'Edit', edit_diorama_path(@diorama) %> |

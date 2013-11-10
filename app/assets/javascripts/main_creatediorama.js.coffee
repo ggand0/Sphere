@@ -16,6 +16,11 @@ $ ->
         console.log(JSON.parse(data['modeldata']))
         console.log(data['textures'])
         console.log(data['url'])
+        
+        console.log("id:")
+        console.log(data['id'])
+        window.selectedModelId = data['id']
+        #console.log(selectedModelId)
         controller.reloadModelDatum(JSON.parse(data['modeldata']), data['url'])
       )
     )
@@ -25,4 +30,5 @@ $ ->
   
   # ロード開始
   controller = new window.DioramaController()
+  controller.create()
   addEventToLink(controller)

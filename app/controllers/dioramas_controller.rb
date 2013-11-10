@@ -10,32 +10,31 @@ class DioramasController < ApplicationController
   # GET /dioramas/1
   # GET /dioramas/1.json
   def show
-    p("show action has been called.")
-    p(@diorama)
-    #p(@diorama.stage)
-    p(@diorama.model_datum)
-    #p(@diorama.model_datum[0].modeldata)
     @stageTextures = @diorama.stage.textures[0]
     @selectedModel = @diorama.model_datum[0]
-    p(@stageTextures)
-    p(@diorama.stage.textures[0].data.url)
     
-    pos = []
+    @positions = []
     for model_transform in @diorama.model_transforms do
       if (model_transform.transform != nil)
-        pos << model_transform.transform
+        @positions << model_transform.transform
       end
     end
-    p(pos)
-    @positions = pos
-#p(@diorama.model_datum['modeldata'])
+    
+    @ids = []
+    @modelData = []
+    @textures = []
+    # ひとまず使用されてるmodeldata全部突っ込む仕様で。後々重複を避けるように変更する
+    for model_datum in @diorama.model_datum do
+      @ids << model_datum.id
+      @modelData << model_datum.modeldata
+      @textures << model_datum.textures[0] 
+    end
   end
 
   # GET /dioramas/new
   def new
     @diorama = Diorama.new
-    
-    p("new method was called.")
+
     # 素材配置のために格納しておく
     @model_data = ModelDatum.all
     @stages = Stage.all
@@ -47,10 +46,7 @@ class DioramasController < ApplicationController
     @selectedStageTextures = @selectedStage.textures[0]
     
     # 初期値設定
-    #@diorama.stage.build
-    #@diorama.stage.scene_data = @selectedStage.scene_data
-    #@diorama.stage = @selectedStage
-    # 無理そうなのでセッションにstage_idを入れておいてcreateする時に使う
+    # セッションにデフォルトで使うstage_idを入れておいてcreateする時に使う
     session[:stage_id] = 4
     session[:model_id] = 37
   end
@@ -59,26 +55,18 @@ class DioramasController < ApplicationController
   def edit
   end
 
-  
+  # [未使用]
   def ready
     render :nothing => true
-    
     @isReady = true
-    p("ready action was called.")
-    #p(params)
-    #p(params[:code])
-      
+
     for position in params[:code] do
       @trans = ModelTransform.new(:transform => position)
     end
-    p(@trans)
-    p(@trans.transform)
   end
   
-  def findModel
-    p("findModel action was called.")
-    p(params[:id])
-    
+  # JS側で指定されたIDのモデルデータをセットする
+  def set_model
     @diorama = Diorama.new
     @model_data = ModelDatum.all
     @stages = Stage.all
@@ -88,57 +76,30 @@ class DioramasController < ApplicationController
     @selectedModelTextures = @selectedModel.textures[0]
     session[:stage_id] = 4
     session[:model_id] = params[:id]
-    p(@selectedModelTextures.data.url)
-      
+
     render :action => "new"
-    
-=begin
-    @selectedModel = ModelDatum.find(37)
-       @selectedStage = Stage.find(4)
-       @selectedModelTextures = @selectedModel.textures[0]
-       @selectedStageTextures = @selectedStage.textures[0]
-=end
   end
   
   
   # POST /dioramas
   # POST /dioramas.json
   def create
-    #@diorama = Diorama.new(diorama_params)
-    p("create action was called.")
-    
     @diorama = Diorama.new(:title => params[:diorama][:title])
-    p(@diorama.model_transforms)
-    
+
     # Stage追加
-    p(@selectedStage)
-    p("diorama.stage :")
-    #@diorama.stage = @selectedStage
-    #@diorama.stage = params[:diorama][:stage]
     @diorama.stage = Stage.find(session[:stage_id])
-    
+
     # ModelTransforms追加
-    p(params[:diorama][:model_transforms_attributes])
-    p(params[:diorama][:model_transforms_attributes]['0']['transform'])
-    
     tmp = params[:diorama][:model_transforms_attributes]['0']['transform']
     posArray = ActiveSupport::JSON.decode(tmp)
-    p(posArray)  
     
-    #for position in params[:diorama][:model_transforms_attributes]['0']['transform'] do
     for position in posArray do
       # convert array to string
-      p(position)
-      #@transform = ModelTransform.new(:transform => position.to_sentence)
-      @transform = ModelTransform.new(:transform => position)
+      @transform = ModelTransform.new(:transform => position['pos'].to_s)
       @diorama.model_transforms << @transform
+      @diorama.model_datum << ModelDatum.find(position['id'])
     end
-#p(@diorama.nothing)
-    p(@diorama.model_transforms)
 
-    # ModelData追加
-    @diorama.model_datum << ModelDatum.find(session[:model_id])
-    
     respond_to do |format|
       if @diorama.save!
         format.html { redirect_to @diorama, notice: 'Diorama was successfully created.' }
