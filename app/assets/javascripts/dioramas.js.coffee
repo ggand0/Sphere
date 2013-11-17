@@ -18,9 +18,9 @@ class ModelData
     @id = id
     @transform = transform
     generateMesh.call(this)
-    
+  
+  # 取得したデータからMesh生成
   generateMesh = () ->
-    # 取得したデータからMesh生成
     newMesh = new THREE.Mesh( @data.geometry,
       @data.material)
     newMesh.scale = new THREE.Vector3(10, 10, 10)

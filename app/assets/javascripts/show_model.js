@@ -3,7 +3,7 @@ $(function() {
 
 	var renderer = new THREE.WebGLRenderer({ antialias:true });
 	renderer.setSize(500, 500);
-	renderer.setClearColorHex(0x000000, 1);
+	renderer.setClearColorHex(0x111111, 1);
 	$('body').append(renderer.domElement);
 	
 	var mesh = new THREE.Mesh();	// createSceneに参照渡ししたいのでオブジェクトを入れておく
@@ -32,7 +32,11 @@ $(function() {
 		console.log("texture_path variable:\n" + texture_path);
 		//loader.parse(model_json, createScene, sig+texture_path);
 		//loader.parse(model_json, createScene, texture_path);
-		loader.parse(model_json, initScene, texture_path);
+		
+		url = texture_path;
+        urlBase = url.replace(url.substr(url.lastIndexOf('/') + 1), '');
+        console.log("urlBase:"+urlBase);
+		loader.parse(model_json, initScene, urlBase);
 	}
 	
 	// sceneを変数に入れるだけのコールバック関数

@@ -20,3 +20,7 @@ Gemfile
 
 # Ignore paperclip image files
 /public/system
+
+/app/assets/javascripts/bak
+/my_data/bak
+

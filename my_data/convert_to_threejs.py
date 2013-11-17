@@ -87,6 +87,7 @@ def getMaterialName(m, force_prefix = False):
 
 def getTextureName(t, force_prefix = False):
     texture_file = t.GetFileName()
+    print("texture_file :" + t.GetFileName())
     texture_id = os.path.splitext(os.path.basename(texture_file))[0]
     prefix = ""
     if option_prefix or force_prefix:

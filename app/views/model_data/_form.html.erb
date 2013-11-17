@@ -21,9 +21,9 @@
     <%= f.file_field :file %>
   </div>
 
-  <div class="newPaperclipFiles">
-	<%= f.fields_for :texture do |t| %>
-		<%= t.file_field :data %>
+  <div class="files">
+	<%= f.fields_for :texture, html: { class: "upload", multipart: true } do |t| %>
+		<%= t.file_field 'model_datum[textures]', multiple: true %>
 	<% end %>
   </div>
   <div class="actions">

@@ -16,7 +16,7 @@
 		
 		<!-- If modeldata has at least one texture, set the path -->
 		<% if !@model_datum.textures.empty? %>
-			window.texture_path = "<%= @textures.data.url %>";
+			window.texture_path = "<%= @textures[0].data.url %>";
 		<% else %>
   			window.texture_path = "";
 		<% end %>
@@ -31,7 +31,7 @@
 <!-- Put texture image for debug -->
 <% if !@model_datum.textures.empty? %>
 	This model has the following textures:<br>
-	<%= image_tag @textures.data.url %>
+	<%= image_tag @textures[0].data.url %>
 <% else %>
 	This model does not have any textures.
 <% end %>

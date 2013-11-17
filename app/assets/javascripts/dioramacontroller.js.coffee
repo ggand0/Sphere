@@ -94,8 +94,13 @@ class DioramaController
     loader = new THREE.SceneLoader()
     loader.parse(data, (result) ->
         console.log("modelDatum callback function has been called.")
-        dioramaModel.setModelDatum.call(this, result.scene.children[0])
+        #dioramaModel.setModelDatum.call(this, result.scene.children[0])
+        dioramaModel.setModelDatum.call(this, result.scene.children[1])
         #deferred.resolve()
+        
+        console.log("current model:")
+        console.log(result)
+        console.log(dioramaModel.getModelDatum())
         console.log(path)
     , path)
    
@@ -178,11 +183,15 @@ class DioramaController
       console.log(getSelectedModels.call(this))
     else if event.keyCode is 99      # Cキー
       console.log(dioramaModel.getModelData())
+    else if event.keyCode is 103      # Gキー
+      #console.log(dioramaView.getSceneObjects(instanceof THREE.Mesh))
+      #console.log(dioramaView.getAllSceneObjects())
+      console.log(dioramaView.getScene())
     else
       addModel.call(this, event)
 
   getSelectedModels = () ->
-    array = (obj for obj in dioramaView.getSceneObjects() when obj.userData['selected'] is true)
+    array = (obj for obj in dioramaView.getAllSceneObjects() when obj.userData['selected'] is true)
     return array
 
   # モデルをSceneとmodelDataから削除する
@@ -226,7 +235,11 @@ class DioramaController
     #dioramaView.addModelToScene(newMesh)
     
     newMesh = dioramaModel.getModelDatum().meshData.clone()
-    newMesh.position = new THREE.Vector3(Math.random() * 100, Math.random() * 100, Math.random() * 100)
+    #newMesh.position = new THREE.Vector3(Math.random() * 100, Math.random() * 100, Math.random() * 100)
+    newMesh.position = new THREE.Vector3(0, 0, 0)
+    newMesh.scale = 10
+    console.log("Adding new mesh...")
+    console.log(newMesh)
     dioramaView.addModelToScene(newMesh)
     
     # Dioramaにも追加
@@ -234,8 +247,8 @@ class DioramaController
     
     
     #newModel = new ModelData(selectedModelMesh, selectedModelId, newMesh.position)
-    console.log(selectedModelMesh)
-    console.log(selectedModelMesh.meshData)
+    #console.log(selectedModelMesh)
+    #console.log(selectedModelMesh.meshData)
     #newModel = new ModelData(selectedModelMesh.data, selectedModelId, selectedModelMesh.meshData.position)
     newModel = new ModelData(selectedModelMesh.data, selectedModelId, newMesh.position)
     dioramaModel.addModelDatum(newModel)

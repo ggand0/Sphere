@@ -11836,11 +11836,15 @@ THREE.SceneLoader.prototype = {
 
 	},
 
-	parse: function ( json, callbackFinished, url ) {
+	parse: function ( json, callbackFinished, url) {
 
 		var scope = this;
 
 		var urlBase = THREE.Loader.prototype.extractUrlBase( url );
+		/*var urlFormatted = [];
+		for (i = 0; i < urls.length; i++) {
+			urlFormatted.push(THREE.Loader.prototype.extractUrlBase( urls[i] ));
+		}*/
 
 		var geometry, material, camera, fog,
 			texture, images, color,
@@ -11932,6 +11936,9 @@ THREE.SceneLoader.prototype = {
 			} else {
 
 				//return urlBase + "/" + source_url;
+				//source_url.replace('//', '/');	// replace double slash with single slash.
+				//console.log("THREE.get_url:source_url" + source_url);
+				//console.log("THREE.get_url:urlBase" + urlBase);
 				return urlBase + source_url;
 
 			}
@@ -11948,9 +11955,10 @@ THREE.SceneLoader.prototype = {
 
 		// handle all the children from the loaded json and attach them to given parent
 
-		function handle_children( parent, children ) {
+		function handle_children( parent, children) {
 
 			var mat, dst, pos, rot, scl, quat;
+			var index = 0;
 
 			for ( var objID in children ) {
 
@@ -11998,6 +12006,7 @@ THREE.SceneLoader.prototype = {
 							if ( loader.options ) {
 
 								loader.load( get_url( objJSON.url, data.urlBaseType ), create_callback_hierachy( objID, parent, material, objJSON ) );
+								//loader.load( get_url( urlFormatted[index], data.urlBaseType ), create_callback_hierachy( objID, parent, material, objJSON ) );
 
 							// UTF8Loader
 							// OBJLoader
@@ -12005,6 +12014,7 @@ THREE.SceneLoader.prototype = {
 							} else {
 
 								loader.load( get_url( objJSON.url, data.urlBaseType ), create_callback_hierachy( objID, parent, material, objJSON ), loaderParameters );
+								//loader.load( get_url( urlFormatted[index], data.urlBaseType ), create_callback_hierachy( objID, parent, material, objJSON ), loaderParameters );
 
 							}
 
@@ -12293,9 +12303,10 @@ THREE.SceneLoader.prototype = {
 
 				if ( object !== undefined && objJSON.children !== undefined ) {
 
-					handle_children( object, objJSON.children );
+					handle_children( object, objJSON.children);
 
 				}
+				index++;
 
 			}
 
@@ -12443,13 +12454,13 @@ THREE.SceneLoader.prototype = {
 				loadedTextures : total_textures - counter_textures
 
 			};
-
+			console.log("THREE.js:callbackProgress...");
 			scope.callbackProgress( progress, result );
-
+			console.log("THREE.js:onLoadProgress...");
 			scope.onLoadProgress();
-
+			console.log("THREE.js:"+counter_models + " " + counter_textures);
 			if ( counter_models === 0 && counter_textures === 0 ) {
-
+				console.log("THREE.js:finalize..");
 				finalize();
 				callbackFinished( result );
 
@@ -12739,12 +12750,17 @@ THREE.SceneLoader.prototype = {
 				}
 
 			} else {
-
+				// debug log added by pentiumx
+				
+				var textureUrl = textureJSON.url.replace('/', '');
+				
 				var isCompressed = /\.dds$/i.test( textureJSON.url );
-				var fullUrl = get_url( textureJSON.url, data.urlBaseType );
+				//var fullUrl = get_url( textureJSON.url, data.urlBaseType );
+				var fullUrl = get_url( textureUrl, data.urlBaseType );
 				var textureCallback = generateTextureCallback( 1 );
-				// debug log added by me
+				
 				console.log("textureJSON.url = " + textureJSON.url);
+				console.log("textureUrl = " + textureUrl);
 				console.log("texture full URL = " + fullUrl);
 
 				if ( isCompressed ) {
@@ -12806,6 +12822,7 @@ THREE.SceneLoader.prototype = {
 		var parID;
 
 		for ( matID in data.materials ) {
+			console.log("THREE.js:loading materials...");
 
 			matJSON = data.materials[ matID ];
 
@@ -12982,7 +12999,7 @@ THREE.SceneLoader.prototype = {
 		}
 
 		// objects ( synchronous init of procedural primitives )
-
+		console.log("THREE.js:handling objects...");
 		handle_objects();
 
 		// defaults
@@ -13000,11 +13017,12 @@ THREE.SceneLoader.prototype = {
 		}
 
 		// synchronous callback
-
+		console.log("THREE.js:sync callback...");
 		scope.callbackSync( result );
 
 		// just in case there are no async elements
-
+		console.log("THREE.js:async callback...");
+		console.log("total_textures : " + total_textures);
 		async_callback_gate();
 
 	}

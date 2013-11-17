@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 class ModelDataController < ApplicationController
   before_action :set_model_datum, only: [:show, :edit, :update, :destroy]
 
@@ -22,13 +23,7 @@ class ModelDataController < ApplicationController
   # GET /model_data/1
   # GET /model_data/1.json
   def show
-    @textures = @model_datum.textures[0]
-    unless @model_datum.textures.empty?
-      p(@model_datum.textures)
-      p("debug texture url:")
-      p(@textures.data.url)
-    end
-
+    @textures = @model_datum.textures
   end
 
   # GET /model_data/new
@@ -44,8 +39,7 @@ class ModelDataController < ApplicationController
   # POST /model_data
   # POST /model_data.json
   def create
-    #@model_datum = ModelDatum.new(model_datum_params)
-    
+    #hoge
     # フォームからファイルを受取り、my_dataフォルダ内に一時保存、
     # JSONファイルにコンバートした後、文字列を抜き出してDBに保存する。
     # ToDo:主要な処理をServiceオブジェクトへ移動する
@@ -57,12 +51,15 @@ class ModelDataController < ApplicationController
     p(defPath + file.original_filename)
     
     of = File.open(defPath + file.original_filename, 'w')
-    of.write(file.read)
+    #of.write(file.read.force_encoding("ascii-8bit"))
+    of.write(file.read.force_encoding("UTF-8"))
     of.close
     
     # JSON形式に変換
     p("json export result : ")
-    value = %x(python2.6 my_data/convert_to_threejs.py my_data/#{file.original_filename} my_data/#{file.original_filename}.js 2>&1)
+    #value = %x(python2.6 my_data/convert_to_threejs.py my_data/#{file.original_filename} my_data/#{file.original_filename}.js 2>&1)
+    # テクスチャurlにmy_data/を含めたくないので、ディレクトリ移動後に実行
+    value = %x(cd my_data; python2.6 convert_to_threejs.py #{file.original_filename} #{file.original_filename}.js 2>&1)
     p(value)
     
     # 元ファイル削除
@@ -80,21 +77,16 @@ class ModelDataController < ApplicationController
     
     @model_datum = ModelDatum.new(:modeldata => @jsonstring, :title => params[:model_datum][:title])
     
-    p("form data:")
-    p(params[:model_datum][:texture])
-      
     if params[:model_datum][:texture] != nil
-      #@textures = Texture.new(:data => params.require(:model_datum).permit(:texture))
-      #@textures = Texture.new(:data => params[:file])# みたいな形式でいいらしい
-      #@textures = Texture.new(:data => params[:model_datum][:texture])
-      #Paperclip::AdapterRegistry::NoHandlerError in ModelDataController#create
-      @textures = Texture.new(:data => params[:model_datum][:texture]['data'])
+      #@textures = Texture.new(:data => params[:model_datum][:texture]['data'])
+      #for file in params[:model_datum][:texture][:data]
+      for file in params[:model_datum][:texture][:model_datum][:textures]
+        #textures << texture
+        texture = Texture.new(:data => file)
+        @model_datum.textures << texture
+      end
       
-      #@model_datum.textures.build
-      @model_datum.textures << @textures
-      p("variable @model_datum : ")
-      #p(params[:model_datum][:texture])#in
-      p(@model_datum.textures)
+      #@model_datum.textures << textures
     end
     
     # saveしてDBへ保存
@@ -110,10 +102,8 @@ class ModelDataController < ApplicationController
     end
     
     # JSON(.js)ファイル削除
-    p(file)
-    p(file.original_filename+".js")
-    value = %x(rm -f #{defPath}#{file.original_filename}.js)
     p("deleting .js file...")
+    value = %x(rm -f #{defPath}#{file.original_filename}.js)
     p(value)
   end
 

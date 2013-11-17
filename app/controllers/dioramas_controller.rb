@@ -41,13 +41,13 @@ class DioramasController < ApplicationController
     
     # 選択しているstageとmodeldataを入れる変数
     @selectedModel = ModelDatum.find(37)
-    @selectedStage = Stage.find(4)
+    @selectedStage = Stage.find(6)
     @selectedModelTextures = @selectedModel.textures[0]
     @selectedStageTextures = @selectedStage.textures[0]
     
     # 初期値設定
     # セッションにデフォルトで使うstage_idを入れておいてcreateする時に使う
-    session[:stage_id] = 4
+    session[:stage_id] = 6
     session[:model_id] = 37
   end
 
@@ -70,11 +70,11 @@ class DioramasController < ApplicationController
     @diorama = Diorama.new
     @model_data = ModelDatum.all
     @stages = Stage.all
-    @selectedStage = Stage.find(4)
+    @selectedStage = Stage.find(6)
     @selectedModel = ModelDatum.find(params[:id])
     @selectedStageTextures = @selectedStage.textures[0]
     @selectedModelTextures = @selectedModel.textures[0]
-    session[:stage_id] = 4
+    session[:stage_id] = 6
     session[:model_id] = params[:id]
 
     render :action => "new"

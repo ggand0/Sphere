@@ -47,7 +47,7 @@ $(function() {
 		camera.up = new THREE.Vector3(0,0,1);
 		camera.lookAt(lookAtPos);
 		
-		controls = new THREE.OrbitControls( camera, renderer.domElement ); 
+		controls = new THREE.OrbitControls( camera, renderer.domElement );
 		//controls.center = lookAtPos;	// lookAtPosは変わるが回転中心も変わる
 		//camera.lookAt(scene.scene.position);
 		scene.camera = camera;

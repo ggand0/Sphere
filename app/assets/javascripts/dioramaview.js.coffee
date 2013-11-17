@@ -3,7 +3,7 @@ class DioramaView
   canvasSize = new THREE.Vector2 1024, 768
   renderer = new THREE.WebGLRenderer { antialias:true }
   renderer.setSize(canvasSize.x , canvasSize.y)
-  renderer.setClearColorHex(0x000000, 1)
+  renderer.setClearColorHex(0xffffff, 1)
   
   $container = $("#left-box")
   $renderer = $(renderer.domElement)
@@ -63,6 +63,15 @@ class DioramaView
   # 既に設定されたsceneにいろいろ追加する、シーン生成関数
   createScene = () ->
     console.log("Creating scene...")
+    # tmp
+    for obj in scene.scene.children
+      scene.scene.remove(obj)
+    #scene.objects.remove(scene.objects[0])
+    delete scene.objects.Object_3
+    console.log(typeof scene.objects)
+    #scene.objects.splice(0, 1)
+    console.log(scene)
+    
     # FPS表示用のインスタンス生成＆bodyに追加
     stats = new window.StyledStats()
 
@@ -84,6 +93,26 @@ class DioramaView
     scene.scene.add(light)
     ambient = new THREE.AmbientLight(0x333333)
     scene.scene.add(ambient)
+    
+    # generate grid plane
+    geometry = new THREE.Geometry();
+    geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( - 500, 0, 0 ) ) )
+    geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 500, 0, 0 ) ) )
+    linesMaterial = new THREE.LineBasicMaterial( 0x000000, 0.2 )
+    #linesMaterial = new THREE.LineBasicMaterial( 0xcccccc, 1.0 )
+    #for ( var i = 0; i <= 20; i ++ ) {
+    for i in [0..20]
+      line = new THREE.Line( geometry, linesMaterial )
+      line.position.z = ( i * 50 ) - 500
+      scene.scene.add( line )
+
+      line = new THREE.Line( geometry, linesMaterial )
+      line.position.x = ( i * 50 ) - 500
+      line.rotation.y = 90 * Math.PI / 180
+      scene.scene.add( line )
+    plane = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshBasicMaterial({color: 0xcccccc}));
+    plane.rotation.x = -90 * Math.PI / 180# 回転
+    scene.scene.add( plane )
     
     # draw debug info
     $debugText = $('<div>')
@@ -185,7 +214,8 @@ class DioramaView
     
   # モデル追加・操作関連のイベントを追加する
   addModelEvents= () ->
-    $(document).on "mousedown", (event) ->  
+    $(document).on "mousedown", (event) ->
+    #$container.on "mousedown", (event) ->
       # Picking ray detection
       rect = event.originalEvent.target.getBoundingClientRect()
       # マウス位置(2D)
@@ -208,7 +238,7 @@ class DioramaView
       # 何かと交差していたら、対象を選択中のオブジェクトとしてisSelectedへ保存する
       if intersects.length > 0
         enableControl = false
-        intersects[0].object.material.color.setHex( Math.random() * 0xffffff )
+        #intersects[0].object.material.color.setHex( Math.random() * 0xffffff )
         isSelected = intersects[0].object
         
         # 選択フラグを操作
@@ -225,7 +255,7 @@ class DioramaView
         intersects = raycaster.intersectObject( plane )
         offset.copy( intersects[0].point ).sub( plane.position )
         
-        
+            
     $(document).on "mouseup", (event) ->
       console.log("mouseup")
       console.log(isIntersected)
@@ -250,6 +280,7 @@ class DioramaView
       projector.unprojectVector( vector, scene.camera )
       raycaster = new THREE.Raycaster( scene.camera.position, vector.sub( scene.camera.position ).normalize() )
       if isSelected
+        console.log(isSelected)
         # planeはカメラ方向を向かせているので絶対交差するはず
         intersects = raycaster.intersectObject( plane )
         isSelected.position.copy( intersects[0].point.sub( offset ) )
@@ -258,28 +289,42 @@ class DioramaView
       intersects = raycaster.intersectObjects( modelObjects )
       if intersects.length > 0
         if isIntersected isnt intersects[0].object
-          if isIntersected
-            isIntersected.material.color.setHex( isIntersected.currentHex )
+          #if isIntersected
+            #console.log(isIntersected)
+            #isIntersected.material.color.setHex( isIntersected.currentHex )
   
           isIntersected = intersects[0].object
-          isIntersected.currentHex = isIntersected.material.color.getHex()
+          #isIntersected.currentHex = isIntersected.material.color.getHex()
           
           
           # オブジェクトを動かす基準にする平面を、カメラの方へ向ける（並行に置く）
           plane.position.copy( isIntersected.position )
           plane.lookAt( scene.camera.position )
       else
-        if isIntersected
-          isIntersected.material.color.setHex( isIntersected.currentHex )
+        #if isIntersected
+          #console.log(isIntersected)
+          #isIntersected.material.color.setHex( isIntersected.currentHex )
         isIntersected = null
         #container.style.cursor = 'auto'
     
     # その他のイベントを追加
-    #$("body").keypress(dioramaController.addModel)
-    $("body").keypress(dioramaController.handleKeyEvents)
     $('body').on('dblclick', dioramaController.insertTransforms)
-        
+    $("body").keypress(dioramaController.handleKeyEvents)
+    #$container.keypress(dioramaController.handleKeyEvents)
+    #$renderer.keypress(dioramaController.handleKeyEvents)
+    #$(renderer.domElement).keypress(dioramaController.handleKeyEvents)
+    #$("#left-box").keypress(dioramaController.handleKeyEvents)
+    #$("#left-box").on('keypress', dioramaController.handleKeyEvents)
+    #$("#left-box").keypress((event) ->
+    #renderer.context.canvas.addEventListener("keypress", (event) ->
+    console.log("SELECTOR TEST ")
+    console.log(renderer.context)
+    console.log($("#left-box"))
+    console.log($('body'))
     
+    
+    
+
   # マウスイベントを追加する
   addEvents= (addControlEvents) ->
     console.log("Adding events...")
@@ -312,8 +357,13 @@ class DioramaView
     for d in dels
       scene.scene.remove(d[0])
       
-  getSceneObjects: () ->
+  getAllSceneObjects: () ->
     return scene.scene.children
+  getSceneObjects: (type) ->
+    array = (value for value in scene.scene.children when value instanceof type)
+    return array
+  getScene: ->
+    return scene;
   setSceneObjects: (objects) ->
     scene.scene.children = objects
 
