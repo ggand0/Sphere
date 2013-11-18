@@ -28,6 +28,7 @@ $ ->
         if data['url']
           url = data['url'][0]
           urlBase = url.replace(url.substr(url.lastIndexOf('/') + 1), '')
+          
 
         #controller.reloadModelDatum(JSON.parse(data['modeldata']), if data['url'] then data['url'] else "")
         controller.reloadModelDatum(JSON.parse(data['modeldata']), if urlBase then urlBase else "")

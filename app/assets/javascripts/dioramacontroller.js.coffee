@@ -227,17 +227,17 @@ class DioramaController
     newMesh.position = new THREE.Vector3(Math.random() * 100, Math.random() * 100, Math.random() * 100)
     newMesh.userData = { selected: false }
     ###
-    
-    
+
 
     # ToDo:dioramaViewがdioramaModelを参照してsceneを更新するようにする
     # 取得したモデルデータをViewが持っているsceneに追加する(Viewのメソッドを呼ぶ形にしたほうが良いかも)
     #dioramaView.addModelToScene(newMesh)
-    
     newMesh = dioramaModel.getModelDatum().meshData.clone()
     #newMesh.position = new THREE.Vector3(Math.random() * 100, Math.random() * 100, Math.random() * 100)
     newMesh.position = new THREE.Vector3(0, 0, 0)
-    newMesh.scale = 10
+    #newMesh.material.uniforms.edgeColor.value = new THREE.Vector4(0, 0, 0, 0);
+    #newMesh.material.uniforms.edge.value = false;
+    newMesh.castShadow = true;
     console.log("Adding new mesh...")
     console.log(newMesh)
     dioramaView.addModelToScene(newMesh)

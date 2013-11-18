@@ -9,7 +9,7 @@
 	// sceneの初期設定を行う（camera, lightなど）
 	$.fn.createScene = function(scene, mesh) {
 		// make cameras
-		var camera = new THREE.PerspectiveCamera(15, 500 / 500);
+		var camera = new THREE.PerspectiveCamera(15, 1000 / 1000);
 		camera.position = new THREE.Vector3(0, 0, 8);
 		camera.lookAt(new THREE.Vector3(0, 0, 0));
 		scene.camera = camera;
@@ -18,9 +18,9 @@
 		// make lights
 		var light = new THREE.DirectionalLight(0xcccccc);
 		light.position = new THREE.Vector3(0.577, 0.577, 0.577);
-		//scene.scene.add(light);
+		scene.scene.add(light);
 		var ambient = new THREE.AmbientLight(0x333333);
-		//scene.scene.add(ambient);
+		scene.scene.add(ambient);
 	};
 	
 })(jQuery);

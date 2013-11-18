@@ -12753,6 +12753,7 @@ THREE.SceneLoader.prototype = {
 				// debug log added by pentiumx
 				
 				var textureUrl = textureJSON.url.replace('/', '');
+				textureUrl = textureUrl.replace('var/www/html/RailsTest/model/my_data/mikuXS.fbm/', '');
 				
 				var isCompressed = /\.dds$/i.test( textureJSON.url );
 				//var fullUrl = get_url( textureJSON.url, data.urlBaseType );

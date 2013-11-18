@@ -4,6 +4,7 @@ class DioramaView
   renderer = new THREE.WebGLRenderer { antialias:true }
   renderer.setSize(canvasSize.x , canvasSize.y)
   renderer.setClearColorHex(0xffffff, 1)
+  renderer.shadowMapEnabled = true;
   
   $container = $("#left-box")
   $renderer = $(renderer.domElement)
@@ -88,10 +89,19 @@ class DioramaView
     scene.camera = camera
 
     # make lights
-    light = new THREE.DirectionalLight(0xcccccc)
-    light.position = new THREE.Vector3(0.577, 0.577, 1000)
+    light = new THREE.DirectionalLight(0xffffff)
+    #light.position = new THREE.Vector3(0.577, 10, 10)
+    light.position = new THREE.Vector3(0.577, 10, 50)
+    light.castShadow = true;
+    light.shadowCameraVisible = true;
+    light2 = new THREE.DirectionalLight(0xffffff)
+    #light2.position = new THREE.Vector3(0.577, 100, 10)
+    light2.position = new THREE.Vector3(0.577, 100, 100)
+    light2.castShadow = true;
+    light2.shadowCameraVisible = true;
     scene.scene.add(light)
-    ambient = new THREE.AmbientLight(0x333333)
+    scene.scene.add(light2)
+    ambient = new THREE.AmbientLight(0x555555)
     scene.scene.add(ambient)
     
     # generate grid plane
@@ -112,6 +122,7 @@ class DioramaView
       scene.scene.add( line )
     plane = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshBasicMaterial({color: 0xcccccc}));
     plane.rotation.x = -90 * Math.PI / 180# 回転
+    plane.receiveShadow = true;
     scene.scene.add( plane )
     
     # draw debug info

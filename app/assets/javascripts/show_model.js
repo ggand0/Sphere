@@ -2,12 +2,12 @@ $(function() {
 	THREE.ImageUtils.crossOrigin = "";
 
 	var renderer = new THREE.WebGLRenderer({ antialias:true });
-	renderer.setSize(500, 500);
-	renderer.setClearColorHex(0x111111, 1);
+	renderer.setSize(1000, 1000);
+	renderer.setClearColorHex(0xdddddd, 1);
 	$('body').append(renderer.domElement);
 	
 	var mesh = new THREE.Mesh();	// createSceneに参照渡ししたいのでオブジェクトを入れておく
-	var scene, stats;
+	var scene, stats, controls;
 	var isMouseDown = false;
 	var fov = 70;
 
@@ -47,9 +47,6 @@ $(function() {
 
 		// set stats
 	    stats = new Stats();
-	    /*$s = $('<div>');
-		$s.addClass('stats');
-	    stats.domElement.style = $s.css();*/
 	   	stats.domElement.style.position = 'absolute';
 	    stats.domElement.style.top = '0px';
 	    stats.domElement.style.left= '500px';
@@ -57,11 +54,10 @@ $(function() {
 	    $('body').append(stats.domElement);
 
 
-	  	$(document).on('mousewheel', onDocumentMouseWheel);
-	    
-		
+	  	//$(document).on('mousewheel', onDocumentMouseWheel);
 		$(document).test();
 		$(document).createScene(scene, mesh);
+		controls = new THREE.TrackballControls(scene.camera);
 		
 		
 		// 変数として持ちたいのでsceneから読み込んだ後再び追加
@@ -111,6 +107,7 @@ $(function() {
 	        mesh.rotation.y = spdx;
 	    }
 	    stats.update();
+	    controls.update();
 	}
 	function onDocumentMouseWheel( event ) {
 		// jQueryのeventにwheelDeltaが無いのでoriginalEventを参照
@@ -120,7 +117,7 @@ $(function() {
 	    //	fov, window.innerWidth / window.innerHeight, 1, 1100 );
 	    //scene.camera.projectionMatrix = (new THREE.Matrix4()).makePerspective(
 	    //	fov, window.innerWidth / window.innerHeight, 1, 1100 );//15, 500 / 500
-	    scene.camera.projectionMatrix = (new THREE.Matrix4()).makePerspective( fov, 500 / 500, 1, 1100 );
+	    scene.camera.projectionMatrix = (new THREE.Matrix4()).makePerspective( fov, 1000 / 1000, 1, 1100 );
 	}
 
 });

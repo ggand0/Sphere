@@ -53,6 +53,7 @@ class ModelDataController < ApplicationController
     of = File.open(defPath + file.original_filename, 'w')
     #of.write(file.read.force_encoding("ascii-8bit"))
     of.write(file.read.force_encoding("UTF-8"))
+    #of.write(file.read)
     of.close
     
     # JSON形式に変換
