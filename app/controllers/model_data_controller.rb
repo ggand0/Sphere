@@ -39,60 +39,46 @@ class ModelDataController < ApplicationController
   # POST /model_data
   # POST /model_data.json
   def create
-    #hoge
     # フォームからファイルを受取り、my_dataフォルダ内に一時保存、
     # JSONファイルにコンバートした後、文字列を抜き出してDBに保存する。
     # ToDo:主要な処理をServiceオブジェクトへ移動する
     
     
     # アップロードされたファイルをmodel/my_dataに一時的に保存する
-    file = params['model_datum']['file']# 指定されたファイルにアクセス
-    defPath = "/var/www/html/RailsTest/model/my_data/"
-    p(defPath + file.original_filename)
-    
-    of = File.open(defPath + file.original_filename, 'w')
-    #of.write(file.read.force_encoding("ascii-8bit"))
-    of.write(file.read.force_encoding("UTF-8"))
-    #of.write(file.read)
-    of.close
+    file = params['model_datum']['file']
+    python_path = CONFIG['python_path']
+    tmp_path = CONFIG['tmp_file_path']
+    script_path = CONFIG['script_path']
+
+    # tmp file作成
+    require 'tempfile'
+    file_name = ('a'...'z').to_a.shuffle.join()
+    temp = Tempfile::new(file_name, tmp_path)
+    temp << file.read
     
     # JSON形式に変換
-    p("json export result : ")
-    #value = %x(python2.6 my_data/convert_to_threejs.py my_data/#{file.original_filename} my_data/#{file.original_filename}.js 2>&1)
     # テクスチャurlにmy_data/を含めたくないので、ディレクトリ移動後に実行
-    value = %x(cd my_data; python2.6 convert_to_threejs.py #{file.original_filename} #{file.original_filename}.js 2>&1)
+    value = %x(cd #{tmp_path}; #{python_path} #{script_path} #{temp.path} #{temp.path}.js 2>&1)
+    p("JSON export result : ")
     p(value)
     
-    # 元ファイル削除
-    p("deleting org file...")
-    value = %x(rm -f #{defPath}#{file.original_filename})
-    p(value)
-    
-    # DBに文字列としてJSONファイルの内容を格納（JSONファイルに変換した後であることをよく確認）
-    #file = open(defPath + params[:model_datum][:fileName])#old
-    jsfile = open(defPath + file.original_filename + ".js")
+    # DBに文字列としてJSONファイルの内容を格納
+    jsfile = open(temp.path + ".js")
     @jsonstring = ""
     while line = jsfile.gets
       @jsonstring += line
     end
-    
+
     @model_datum = ModelDatum.new(:modeldata => @jsonstring, :title => params[:model_datum][:title])
-    
     if params[:model_datum][:texture] != nil
-      #@textures = Texture.new(:data => params[:model_datum][:texture]['data'])
-      #for file in params[:model_datum][:texture][:data]
       for file in params[:model_datum][:texture][:model_datum][:textures]
-        #textures << texture
         texture = Texture.new(:data => file)
         @model_datum.textures << texture
       end
-      
-      #@model_datum.textures << textures
     end
     
     # saveしてDBへ保存
     respond_to do |format|
-      #if @model_datum.save && @textures.save
       if @model_datum.save!
         format.html { redirect_to @model_datum, notice: 'Model datum was successfully created.' }
         format.json { render action: 'show', status: :created, location: @model_datum }
@@ -103,9 +89,10 @@ class ModelDataController < ApplicationController
     end
     
     # JSON(.js)ファイル削除
-    p("deleting .js file...")
-    value = %x(rm -f #{defPath}#{file.original_filename}.js)
+    p("Deleting .js file...")
+    value = %x(rm -f #{jsfile.path})
     p(value)
+    temp.close(true)
   end
 
   # PATCH/PUT /model_data/1
