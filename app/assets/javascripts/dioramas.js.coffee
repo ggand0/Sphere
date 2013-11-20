@@ -19,6 +19,7 @@ class ModelData
     @id = id
     @transform = transform
     generateMesh.call(this)
+    #generateMesh()
   
   # 取得したデータからMesh生成
   generateMesh = () ->

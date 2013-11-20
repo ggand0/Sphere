@@ -17,6 +17,7 @@
 
 # Ignore Gemfile
 Gemfile
+Gemfile.lock
 
 # Ignore paperclip image files
 /public/system
