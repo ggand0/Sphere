@@ -62,3 +62,5 @@ end
 
 # 複数ファイルうｐ
 gem 'jquery-fileupload-rails'
+
+gem 'pry-rails'

@@ -312,28 +312,18 @@ class DioramaView
           plane.position.copy( isIntersected.position )
           plane.lookAt( scene.camera.position )
       else
-        #if isIntersected
-          #console.log(isIntersected)
-          #isIntersected.material.color.setHex( isIntersected.currentHex )
         isIntersected = null
         #container.style.cursor = 'auto'
     
     # その他のイベントを追加
     $('body').on('dblclick', dioramaController.insertTransforms)
     $("body").keypress(dioramaController.handleKeyEvents)
-    #$container.keypress(dioramaController.handleKeyEvents)
-    #$renderer.keypress(dioramaController.handleKeyEvents)
-    #$(renderer.domElement).keypress(dioramaController.handleKeyEvents)
-    #$("#left-box").keypress(dioramaController.handleKeyEvents)
-    #$("#left-box").on('keypress', dioramaController.handleKeyEvents)
-    #$("#left-box").keypress((event) ->
-    #renderer.context.canvas.addEventListener("keypress", (event) ->
+   
     console.log("SELECTOR TEST ")
     console.log(renderer.context)
     console.log($("#left-box"))
     console.log($('body'))
-    
-    
+      
     
 
   # マウスイベントを追加する
@@ -356,13 +346,6 @@ class DioramaView
       if obj is target
         scene.scene.remove(obj)
   removeModels: (targets) ->
-    ###
-    dels = []
-    for obj in scene.scene.children
-      for t in targets
-        if obj is t
-          dels.push(obj)
-    ###
     dels = (obj for obj in scene.scene.children when obj is t for t in targets)
     console.log(dels)
     for d in dels

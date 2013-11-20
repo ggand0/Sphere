@@ -28,6 +28,7 @@ class DioramaController
         # 最後にデータをViewに渡してscene生成
         # createなのでモデル追加関連のイベントを追加する
         dioramaView = new DioramaView(self, dioramaModel.stageData, true)
+        dioramaModel.dioramaView = dioramaView
         
         # 描画開始
         draw.call(this)
@@ -53,7 +54,6 @@ class DioramaController
     
     loader.parse(selectedModel, (result) ->
         console.log("modelDatum callback function has been called.")
-        
         # sceneで返ってくるのでchildrenを取得
         #dioramaModel.setModelDatum(result.scene.children[0])
         dioramaModel.setModelDatum.call(this, result.scene.children[0], selectedModelId)
@@ -93,11 +93,11 @@ class DioramaController
   reloadModelDatum : (data, path) ->
     loader = new THREE.SceneLoader()
     loader.parse(data, (result) ->
-        console.log("modelDatum callback function has been called.")
-        #dioramaModel.setModelDatum.call(this, result.scene.children[0])
-        dioramaModel.setModelDatum.call(this, result.scene.children[1])
-        #deferred.resolve()
-        
+      console.log("modelDatum callback function has been called.")
+      if result.scene.children.length == 1
+        dioramaModel.setModelDatum.call(this, result.scene.children[0], undefined)
+      else
+        dioramaModel.setModelDatum.call(this, result.scene.children, result.objects)
         console.log("current model:")
         console.log(result)
         console.log(dioramaModel.getModelDatum())
@@ -139,40 +139,22 @@ class DioramaController
   # 内包表記用の関数
   # タプルを返すように変更
   stringify = (value) ->
-    #JSON.stringify(value.position.toArray())
-    
-    #return JSON.stringify([value.id, JSON.stringify(value.transform.toArray())])
-    #str = '{ "id":value.id, "pos":JSON.stringify(value.transform.toArray()) }'
-    #
     obj = new Object()
     obj.id = value.id
     obj.pos = value.transform.toArray()
-    #str = JSON.stringify(obj)
     console.log("obj:")
     console.log(obj)
-    #console.log(str)
     return obj
-    ###
-    ar = []
-    ar['id'] = value.id
-    ar['pos'] = value.transform.toArray()
-    console.log("ar:")
-    console.log(ar)
-    console.log(JSON.stringify(ar))
-    return JSON.stringify(ar)
-    ###
+    
   
   # 配置されたモデルの位置を取得しarrayに格納して返す
   getModelTransforms = () ->
-    #array = (stringify(value) for value in diorama.scene.scene.children when value instanceof THREE.Mesh)
-    #array = (stringify(value) for value in dioramaView.getSceneObjects() when value instanceof THREE.Mesh)
     array = (stringify(value) for value in dioramaModel.getModelData())
     return array
     
   # モデルの位置情報とIDを取得してarrayに格納しreturnする
   getModelData = () ->
     array = []
-
 
 
   handleKeyEvents: (event) =>
@@ -184,9 +166,9 @@ class DioramaController
     else if event.keyCode is 99      # Cキー
       console.log(dioramaModel.getModelData())
     else if event.keyCode is 103      # Gキー
-      #console.log(dioramaView.getSceneObjects(instanceof THREE.Mesh))
-      #console.log(dioramaView.getAllSceneObjects())
       console.log(dioramaView.getScene())
+    else if event.keyCode is 105      # Iキー
+      
     else
       addModel.call(this, event)
 
@@ -199,14 +181,7 @@ class DioramaController
     console.log("Deleting models...")
     # 選択されているモデルを削除
     # 選択されていないモデルだけ残してセットし直す
-    #array = (obj for obj in dioramaView.getSceneObjects() when obj.userData['selected'] isnt true)
-    ###
-    array = dioramaView.getSceneObjects().filter (obj) -> obj.userData['selected'] isnt true
-    console.log(array)
-    dioramaView.setSceneObjects(array)
-    ###
     array = getSelectedModels()
-    #dioramaView.removeModel(array[0])
     dioramaView.removeModels(array)
         
     # modelData側でも同様に消す、もう少し効率良くしたい
@@ -215,41 +190,16 @@ class DioramaController
 
   # モデルをジオラマのシーンに追加する
   addModel = () =>
-    # モデルデータをModelから取得する
-    ###
-    selectedModelMesh = dioramaModel.getModelDatum().data
-    console.log(selectedModelMesh)
-    
-    # 取得したデータからMesh生成
-    newMesh = new THREE.Mesh( selectedModelMesh.geometry,
-      selectedModelMesh.material)
-    newMesh.scale = new THREE.Vector3(10, 10, 10)
-    newMesh.position = new THREE.Vector3(Math.random() * 100, Math.random() * 100, Math.random() * 100)
-    newMesh.userData = { selected: false }
-    ###
-
-
     # ToDo:dioramaViewがdioramaModelを参照してsceneを更新するようにする
     # 取得したモデルデータをViewが持っているsceneに追加する(Viewのメソッドを呼ぶ形にしたほうが良いかも)
-    #dioramaView.addModelToScene(newMesh)
-    newMesh = dioramaModel.getModelDatum().meshData.clone()
-    #newMesh.position = new THREE.Vector3(Math.random() * 100, Math.random() * 100, Math.random() * 100)
-    newMesh.position = new THREE.Vector3(0, 0, 0)
-    #newMesh.material.uniforms.edgeColor.value = new THREE.Vector4(0, 0, 0, 0);
-    #newMesh.material.uniforms.edge.value = false;
-    newMesh.castShadow = true;
-    console.log("Adding new mesh...")
-    console.log(newMesh)
-    dioramaView.addModelToScene(newMesh)
+    meshes = (mesh.clone() for mesh in dioramaModel.getModelDatum().meshData)
     
+    for mesh in meshes
+      mesh.castShadow = true
+      dioramaView.addModelToScene(mesh)
+
     # Dioramaにも追加
     selectedModelMesh = dioramaModel.getModelDatum()
-    
-    
-    #newModel = new ModelData(selectedModelMesh, selectedModelId, newMesh.position)
-    #console.log(selectedModelMesh)
-    #console.log(selectedModelMesh.meshData)
-    #newModel = new ModelData(selectedModelMesh.data, selectedModelId, selectedModelMesh.meshData.position)
     newModel = new ModelData(selectedModelMesh.data, selectedModelId, newMesh.position)
     dioramaModel.addModelDatum(newModel)
     console.log(newModel)
@@ -263,7 +213,6 @@ class DioramaController
     # Convert JSON to array
     positions = []
     $.each(modelTransforms, (i, obj) ->
-      #console.log(obj)
       positions.push(JSON.parse(obj))
     )
     console.log(positions)
@@ -271,21 +220,15 @@ class DioramaController
     data = dioramaModel.getModelData()
     # modelTransformsで与えられる位置に配置する 
     for value, index in positions
-      #newMesh = new THREE.Mesh( selectedModelMesh.geometry,
-      #  selectedModelMesh.material)
       newMesh = new THREE.Mesh( data[index].geometry,
         data[index].material)
       newMesh.scale = new THREE.Vector3(10, 10, 10)
       
-      #pos = new THREE.Vector3().fromArray(positions[i])
       pos = new THREE.Vector3().fromArray(value)
       console.log(pos)
       
       newMesh.position = pos
-      #scene.scene.add(newMesh)
-      #modelObjects.push(newMesh)  # 判定用に使用する、モデルのみを入れる配列
       dioramaView.addModelToScene(newMesh)
-    #console.log(scene)
   
 
   # ジオラマのモデルの位置データをViewのフォームに入力する
@@ -298,7 +241,6 @@ class DioramaController
     
     $(document).ready () ->
       $("#transforms_field").val(JSON.stringify(positions))
-      #$("#transforms_field").val(positions)
       
 
   # Railsのcontroller内のactionにデータを送るテスト

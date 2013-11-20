@@ -5,13 +5,14 @@
 
 # JSONDataなど１つのモデルに関するデータを格納するクラス。構造体的に使う
 class ModelData
-  data: undefined       # JSONで記述されたモデルデータ
+  data: undefined       # JSONで記述されたモデルデータ　の配列
+  #subData: undefined    # tmp
   id: undefined         # DB上のID
   transform: undefined  # 位置ベクトル
   # Object3D.userData(つまｔりdata.userData)を使うことにする
   #selected: false       # ユーザによって選択されているかどうか
-  meshData: undefined    # Three.Mesh
-  
+  meshData: undefined    # Three.Mesh　の配列
+  dioramaView:undefined
   
   constructor: (data, id, transform) ->
     @data = data
@@ -21,12 +22,53 @@ class ModelData
   
   # 取得したデータからMesh生成
   generateMesh = () ->
-    newMesh = new THREE.Mesh( @data.geometry,
-      @data.material)
-    newMesh.scale = new THREE.Vector3(10, 10, 10)
-    newMesh.position = new THREE.Vector3(Math.random() * 100, Math.random() * 100, Math.random() * 100)
-    newMesh.userData = { selected: false }
-    @meshData = newMesh
+    @meshData = []
+    for d in @data
+      #toonMaterial = new THREE.ShaderMaterial(THREE.Toon['toon0'])
+      ###toonMaterials = []
+      console.log(d)
+      if d instanceof THREE.Mesh
+        for mat in d.material.materials
+          toonMaterial = new THREE.ShaderMaterial({
+            fragmentShader: document.getElementById('fs').innerHTML,
+            vertexShader  : document.getElementById('vs').innerHTML,
+            attributes: {
+              color: {
+                type: 'v4',
+                value: new THREE.Vector4(0, 0, 0, 0)
+              }
+            },
+            uniforms: {
+              edgeColor: {
+                type: 'v4',
+                value: new THREE.Vector4(0, 0, 0, 0)
+              },
+              edge: {
+                type: 'i',
+                value: true
+              },
+              lightDirection: {
+                type: 'v3',
+                #value: dioramaView.scene.lights[0].position
+                value: new THREE.Vector3(0, 100, 100)
+              },
+              texture: {
+                type: 't',
+                #value: THREE.ImageUtils.loadTexture('textures/toon.png')
+                value: mat.map
+              },
+              
+            }
+          })
+          toonMaterials.push(toonMaterial)
+      ###
+      #newMesh = new THREE.Mesh( d.geometry, new THREE.MeshFaceMaterial(toonMaterials))#d.material
+      newMesh = new THREE.Mesh( d.geometry, d.material)       
+      newMesh.scale = new THREE.Vector3(10, 10, 10)
+      newMesh.position = new THREE.Vector3(Math.random() * 100, Math.random() * 100, Math.random() * 100)
+      newMesh.userData = { selected: false }
+      @meshData.push(newMesh)
+
 
 # ジオラマが持つJSONDataの集合
 class Diorama
@@ -37,7 +79,6 @@ class Diorama
 
   constructor: () ->
 
-  
   addModelDatum: (model) ->
     modelData.push(model)
   #selectModelDatum: (selectedModel) ->
@@ -64,11 +105,8 @@ class Diorama
   setStageData: (data) ->
     console.log("Setting stageData...")
     @stageData = data
-    #console.log(data)
-    #console.log(@stageData)
-  setModelDatum: (data, id) ->
-    #modelDatum = data
-    modelDatum = new window.ModelData(data, id)
+  setModelDatum: (data, subData, id) ->
+    modelDatum = new window.ModelData(data, subData, id)
   setModelData: (data) ->
     modelData = data
   
