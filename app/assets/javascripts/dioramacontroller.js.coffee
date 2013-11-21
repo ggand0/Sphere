@@ -4,12 +4,10 @@ class DioramaController
   dioramaView = undefined   # Scene生成やイベント周りを担当するビューオブジェクト
   loaded = false
 
-
   # ここではグローバルで与えられたJSONデータをロードし、
   # それらを用いてModelとView(Scene)生成するまでを行う
   constructor: () ->
     dioramaModel = new Diorama()
-    
     
   # new.htmlで呼ぶ
   create: () ->

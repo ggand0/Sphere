@@ -18,23 +18,11 @@ $(function() {
 	function init() {
 		console.log("function loaded.");
 		console.log("model_json variable:\n" + model_json);
-		
-		// url関連のデバッグ
-		for (var tex in model_json["textures"]){
-		    //console.log(model_json['textures'][tex]);//ok
-		    console.log(model_json['textures'][tex]['url']);
-		}
+		console.log("texture_path variable:\n" + texture_path);
 		
 		var loader = new THREE.SceneLoader();
-		//loader.parse(model_json, function(result){ console.log(result); scene = result;}, '');
-		//loader.parse(model_json, createScene, '');
-		
-		console.log("texture_path variable:\n" + texture_path);
-		//loader.parse(model_json, createScene, sig+texture_path);
-		//loader.parse(model_json, createScene, texture_path);
-		
 		url = texture_path;
-        urlBase = url.replace(url.substr(url.lastIndexOf('/') + 1), '');
+        urlBase = url.replace(/[^/]+$/g,"");
         console.log("urlBase:"+urlBase);
 		loader.parse(model_json, initScene, urlBase);
 	}
