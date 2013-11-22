@@ -43,8 +43,7 @@ class ModelDataController < ApplicationController
         format.json { render json: @model_datum.errors, status: :unprocessable_entity }
       end
     end
-    
-    
+
   end
 
   # PATCH/PUT /model_data/1

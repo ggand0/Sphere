@@ -1,48 +1,45 @@
 class ModelDataService
-  def initialize
-  end
-  
   def convert_model_datum(params)
+    require 'tempfile'
+    
     # アップロードされたファイルをmodel/my_dataに一時的に保存する
-    file = params['model_datum']['file']
+    file = params[:model_datum][:file]
+    jsonstring = ''
     python_path = CONFIG['python_path']
-    tmp_path = CONFIG['tmp_file_path']
+    tmp_dir_path = CONFIG['tmp_file_path']
     script_path = CONFIG['script_path']
 
-    # tmp file作成
-    require 'tempfile'
-    file_name = ('a'...'z').to_a.shuffle.join()
-    temp = Tempfile::new(file_name, tmp_path)
+    # tmpfile作成
+    temp = Tempfile::new('foo', tmp_dir_path)
     temp << file.read
     
-    # JSON形式に変換
-    # テクスチャurlにmy_data/を含めたくないので、ディレクトリ移動後に実行
-    value = %x(cd #{tmp_path}; #{python_path} #{script_path} #{temp.path} #{temp.path}.js 2>&1)
-    p("JSON export result : ")
-    p(value)
-    
-    # DBに文字列としてJSONファイルの内容を格納
-    jsfile = open(temp.path + ".js")
-    @jsonstring = ""
-    while line = jsfile.gets
-      @jsonstring += line
+    # tmpdir内に変換したファイルを出力させる
+    Dir.mktmpdir('hoge') do |dir|
+      out_file_path = dir + '/' + ('a'...'z').to_a.shuffle.join() + '.js'
+      
+      # JSON形式に変換
+      # テクスチャurlに余計なパスが含まれる問題を、変換前ファイルとスクリプトファイルを同階層に置くことで解決している。
+      value = %x(#{python_path} #{script_path} #{temp.path} #{out_file_path} 2>&1)
+      puts 'Convertion result : '
+      puts value
+      
+      # DBに文字列としてJSONファイルの内容を格納
+      jsfile = open(out_file_path)
+      while line = jsfile.gets
+        jsonstring += line
+      end
     end
 
-    @model_datum = ModelDatum.new(:modeldata => @jsonstring, :title => params[:model_datum][:title])
-    if params[:model_datum][:texture] != nil
-      for file in params[:model_datum][:texture][:model_datum][:textures]
-        texture = Texture.new(:data => file)
-        @model_datum.textures << texture
+    # ModelDatumを生成して返す
+    model_datum = ModelDatum.new(modeldata: jsonstring, title: params[:model_datum][:title])
+    unless params[:model_datum][:texture].nil?
+      params[:model_datum][:texture][:model_datum][:textures].each do |file|
+        texture = Texture.new(data: file)
+        model_datum.textures << texture
       end
     end
     
-    # JSON(.js)ファイル削除
-    p("Deleting .js file...")
-    value = %x(rm -f #{jsfile.path})
-    p(value)
     temp.close(true)
-    
-    return @model_datum
+    model_datum
   end
-  
 end

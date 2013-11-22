@@ -5,8 +5,8 @@ class Texture < ActiveRecord::Base
     "#{attachment.instance.texturable_id}"
   end
   Paperclip.interpolates :texturable_type do |attachment, style|
-      "#{attachment.instance.texturable_type}"
-    end
+    "#{attachment.instance.texturable_type}"
+  end
   
   has_attached_file :data,
     :url => '/system/:class/:attachment/:texturable_type/:texturable_id/:filename',

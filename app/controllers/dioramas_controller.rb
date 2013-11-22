@@ -1,5 +1,8 @@
 class DioramasController < ApplicationController
   before_action :set_diorama, only: [:show, :edit, :update, :destroy]
+    
+  DEF_STAGE_ID = 6
+  DEF_MODEL_ID = 37
 
   # GET /dioramas
   # GET /dioramas.json
@@ -40,15 +43,15 @@ class DioramasController < ApplicationController
     @stages = Stage.all
     
     # 選択しているstageとmodeldataを入れる変数
-    @selectedModel = ModelDatum.find(37)
-    @selectedStage = Stage.find(6)
+    @selectedModel = ModelDatum.find(DEF_MODEL_ID)
+    @selectedStage = Stage.find(DEF_STAGE_ID)
     @selectedModelTextures = @selectedModel.textures[0]
     @selectedStageTextures = @selectedStage.textures[0]
     
     # 初期値設定
     # セッションにデフォルトで使うstage_idを入れておいてcreateする時に使う
-    session[:stage_id] = 6
-    session[:model_id] = 37
+    session[:stage_id] = DEF_STAGE_ID
+    session[:model_id] = DEF_MODEL_ID
   end
 
   # GET /dioramas/1/edit
@@ -70,11 +73,11 @@ class DioramasController < ApplicationController
     @diorama = Diorama.new
     @model_data = ModelDatum.all
     @stages = Stage.all
-    @selectedStage = Stage.find(6)
+    @selectedStage = Stage.find(DEF_STAGE_ID)
     @selectedModel = ModelDatum.find(params[:id])
     @selectedStageTextures = @selectedStage.textures[0]
     @selectedModelTextures = @selectedModel.textures[0]
-    session[:stage_id] = 6
+    session[:stage_id] = DEF_STAGE_ID
     session[:model_id] = params[:id]
 
     render :action => "new"
