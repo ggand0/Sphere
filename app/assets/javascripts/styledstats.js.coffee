@@ -1,11 +1,11 @@
 class StyledStats
   stats = undefined
   
-  constructor: () ->
+  constructor: (top, left) ->
     stats = new Stats()
     stats.domElement.style.position = 'absolute'
-    stats.domElement.style.top = '200px'
-    stats.domElement.style.left= '500px'
+    stats.domElement.style.top = top
+    stats.domElement.style.left= left# E.g. '500px'
     stats.domElement.style.zIndex = 100
     $('body').append(stats.domElement)
     

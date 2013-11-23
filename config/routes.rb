@@ -1,6 +1,9 @@
 Model::Application.routes.draw do
-  resources :dioramas
-  resources :model_data
+  resources :model_data do
+    collection do
+      get 'get_contents'
+    end
+  end
   resources :stages
 
   resources :dioramas do

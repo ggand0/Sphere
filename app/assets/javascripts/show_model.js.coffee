@@ -14,20 +14,44 @@ $ ->
   controls = undefined
   isMouseDown = false
   fov = 70
+  urlBase = undefined
+  
+  
+  getModelDatum = () ->
+    deferred = new $.Deferred()
+    id = $('#id').text()
+
+    $.ajax({
+      url: 'get_contents/',
+      type: 'GET',
+      data: {
+        id: id
+      },
+    }).then((data) ->
+      console.log("request succeed.")
+      console.log(data)
+      # モデルデータを取得
+      window.model_json = data['modelData']
+ 
+      # テクスチャのルートパスを取得
+      if data['texturePath']
+        url = data['texturePath']?.replace(/[^/]+$/g, "")
+        urlBase = url ? url or '' # URLの最後の"/"以下を取得(404回避)
+      deferred.resolve()
+    )
+    return deferred.promise()
+    
   
   # railsで指定した、JSONが入ってるグローバル変数をSceneLoaderに投げる
   init = () ->
     console.log("loaded.")
-    console.log("model_json variable:\n" + model_json)
-    console.log("texture_path variable:\n" + texture_path)
-    
-    loader = new THREE.SceneLoader()
-    url = texture_path
-    urlBase = url.replace(/[^/]+$/g,"")
-    console.log("urlBase:"+urlBase)
-    loader.parse(model_json, initScene, urlBase)
 
-  
+    getModelDatum().then(() ->
+      loader = new THREE.SceneLoader()
+      console.log("urlBase:" + urlBase)
+      loader.parse(model_json, initScene, urlBase)
+    )
+
   # sceneを変数に入れるだけのコールバック関数
   initScene = (result) ->
     console.log("callback called.")
@@ -35,7 +59,7 @@ $ ->
     console.log(scene)
 
     # set stats
-    stats = new window.StyledStats()
+    stats = new window.StyledStats('0px', '500px')
 
     # make cameras
     camera = new THREE.PerspectiveCamera(15, canvasSize.x / canvasSize.y)

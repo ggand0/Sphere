@@ -67,7 +67,7 @@ class DioramaView
     console.log("Creating scene...")
     
     # FPS表示用のインスタンス生成＆bodyに追加
-    stats = new window.StyledStats()
+    stats = new window.StyledStats('200px', '500px')
 
     # make cameras
     camera = new THREE.PerspectiveCamera(15, canvasSize.x / canvasSize.y, 10, 100000)

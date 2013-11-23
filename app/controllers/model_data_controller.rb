@@ -77,8 +77,18 @@ class ModelDataController < ApplicationController
     end
   end
   
-  def runPython
+  def get_contents
+    @model_datum = ModelDatum.find(params[:id])
+      
+    # If modeldata has at least one texture, set the path
+    unless @model_datum.textures.empty?
+      path = @model_datum.textures[0].data.url
+    else
+      path = ""
+    end
+    jsonString = { modelData: ActiveSupport::JSON.decode(@model_datum.modeldata), texturePath: path }
 
+    render json: jsonString
   end
 
   private
