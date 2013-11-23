@@ -20,7 +20,7 @@ class ModelDataService
       # JSON形式に変換
       # テクスチャurlに余計なパスが含まれる問題を、変換前ファイルとスクリプトファイルを同階層に置くことで解決している。
       value = %x(#{python_path} #{script_path} #{temp.path} #{out_file_path} 2>&1)
-      puts 'Convertion result : '
+      puts 'Conversion result : '
       puts value
       
       # DBに文字列としてJSONファイルの内容を格納

@@ -11,7 +11,14 @@ class ModelDataController < ApplicationController
   # GET /model_data/1
   # GET /model_data/1.json
   def show
+    @data = ActiveSupport::JSON.decode(@model_datum.modeldata)
     @textures = @model_datum.textures
+    unless @model_datum.textures.nil?
+      @urls = []
+      for texture in @model_datum.textures
+        @urls << texture.data.url
+      end
+    end
   end
 
   # GET /model_data/new

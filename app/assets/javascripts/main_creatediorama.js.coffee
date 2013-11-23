@@ -23,7 +23,9 @@ $ ->
           url = data['url'][0]?.replace(/[^/]+$/g,"")
           urlBase = url ? url or '' # URLの最後の"/"以下を取得(404回避)
 
-        controller.reloadModelDatum(JSON.parse(data['modeldata']), urlBase)
+        console.log(data['modeldata'])
+        #controller.reloadModelDatum(JSON.parse(data['modeldata']), urlBase)
+        controller.reloadModelDatum(data['modeldata'], urlBase)
       )
     )
   
