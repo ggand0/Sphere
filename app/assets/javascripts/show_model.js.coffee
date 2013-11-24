@@ -31,7 +31,7 @@ $ ->
       console.log("request succeed.")
       console.log(data)
       # モデルデータを取得
-      window.model_json = data['modelData']
+      window.modelJSON = data['modelData']
  
       # テクスチャのルートパスを取得
       if data['texturePath']
@@ -49,7 +49,7 @@ $ ->
     getModelDatum().then(() ->
       loader = new THREE.SceneLoader()
       console.log("urlBase:" + urlBase)
-      loader.parse(model_json, initScene, urlBase)
+      loader.parse(modelJSON, initScene, urlBase)
     )
 
   # sceneを変数に入れるだけのコールバック関数
