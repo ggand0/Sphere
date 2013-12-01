@@ -4,7 +4,12 @@ Model::Application.routes.draw do
       get 'get_contents'
     end
   end
-  resources :stages
+  
+  resources :stages do
+    collection do
+      get 'get_contents'
+    end
+  end
 
   resources :dioramas do
     collection do

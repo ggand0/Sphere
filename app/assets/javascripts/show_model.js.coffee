@@ -62,7 +62,7 @@ $ ->
     stats = new window.StyledStats('0px', '500px')
 
     # make cameras
-    camera = new THREE.PerspectiveCamera(15, canvasSize.x / canvasSize.y)
+    camera = new THREE.PerspectiveCamera(15, canvasSize.x / canvasSize.y, 0.01, 100000)
     camera.position = new THREE.Vector3(0, 0, 8)
     camera.lookAt(new THREE.Vector3(0, 0, 0))
     scene.camera = camera
