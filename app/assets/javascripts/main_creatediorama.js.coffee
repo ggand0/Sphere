@@ -20,8 +20,8 @@ $ ->
         # テクスチャのルートパスを取得
         urlBase = undefined
         if data['url']
-          url = data['url'][0]?.replace(/[^/]+$/g,"")
-          urlBase = url ? url or '' # URLの最後の"/"以下を取得(404回避)
+          url = data['url'][0]?.replace(/[^/]+$/g, "")
+          urlBase = url or '' # URLの最後の"/"以下を取得(404回避)
 
         console.log(data['modeldata'])
         #controller.reloadModelDatum(JSON.parse(data['modeldata']), urlBase)

@@ -2,7 +2,7 @@ class DioramasController < ApplicationController
   before_action :set_diorama, only: [:show, :edit, :update, :destroy]
     
   DEF_STAGE_ID = 6
-  DEF_MODEL_ID = 37
+  DEF_MODEL_ID = 103
 
   # GET /dioramas
   # GET /dioramas.json

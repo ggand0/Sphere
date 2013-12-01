@@ -93,7 +93,8 @@ class DioramaController
     loader.parse(data, (result) ->
       console.log("modelDatum callback function has been called.")
       if result.scene.children.length == 1
-        dioramaModel.setModelDatum.call(this, result.scene.children[0], undefined)
+        #dioramaModel.setModelDatum.call(this, result.scene.children[0], undefined)
+        dioramaModel.setModelDatum.call(this, result.scene.children, undefined)
       else
         dioramaModel.setModelDatum.call(this, result.scene.children, result.objects)
         console.log("current model:")
@@ -191,16 +192,25 @@ class DioramaController
     # ToDo:dioramaViewがdioramaModelを参照してsceneを更新するようにする
     # 取得したモデルデータをViewが持っているsceneに追加する(Viewのメソッドを呼ぶ形にしたほうが良いかも)
     meshes = (mesh.clone() for mesh in dioramaModel.getModelDatum().meshData)
+    console.log(meshes)
     
     for mesh in meshes
+      # Sceneに追加
       mesh.castShadow = true
       dioramaView.addModelToScene(mesh)
+      # Dioramaに追加
+      #newModel = new ModelData(selectedModelMesh.data, selectedModelId, mesh.position)
+      m = []
+      m.push(mesh.data)
+      newModel = new ModelData(m, selectedModelId, mesh.position)
+      dioramaModel.addModelDatum(newModel)
+      console.log(newModel)
 
     # Dioramaにも追加
-    selectedModelMesh = dioramaModel.getModelDatum()
+    ###selectedModelMesh = dioramaModel.getModelDatum()
     newModel = new ModelData(selectedModelMesh.data, selectedModelId, newMesh.position)
     dioramaModel.addModelDatum(newModel)
-    console.log(newModel)
+    console.log(newModel)###
   
   
   # 既存のジオラマをshowする時に、modelTransformsで与えられた位置にモデルを配置する
