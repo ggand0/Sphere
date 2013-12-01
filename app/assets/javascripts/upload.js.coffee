@@ -1,2 +1,0 @@
-$ ->
-  $('#document_image').fileupload()
