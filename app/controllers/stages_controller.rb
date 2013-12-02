@@ -13,10 +13,7 @@ class StagesController < ApplicationController
     @data = ActiveSupport::JSON.decode(@stage.scene_data)
     @textures = @stage.textures
     unless @stage.textures.nil?
-      @urls = []
-      for texture in @stage.textures
-        @urls << texture.data.url
-      end
+      @urls = @stage.textures.map{ |texture| texture.data.url }
     end
   end
 
@@ -83,11 +80,7 @@ class StagesController < ApplicationController
     @stage = Stage.find(params[:id])
       
     # If modeldata has at least one texture, set the path
-    unless @stage.textures.empty?
-      path = @stage.textures[0].data.url
-    else
-      path = ""
-    end
+    path = @stage.textures[0].data.url or ""
     jsonString = { modelData: ActiveSupport::JSON.decode(@stage.scene_data), texturePath: path }
 
     render json: jsonString
