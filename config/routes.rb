@@ -15,6 +15,8 @@ Model::Application.routes.draw do
     collection do
       post 'ready'
       post 'set_model'
+      get 'get_model_datum'
+      get 'get_stage'
     end
   end
 

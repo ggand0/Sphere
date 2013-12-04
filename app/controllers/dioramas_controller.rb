@@ -137,6 +137,19 @@ class DioramasController < ApplicationController
       format.json { head :no_content }
     end
   end
+  
+  def get_model_datum
+    @model_datum = ModelDatum.find(params[:id])
+    path = @model_datum.textures[0].data.url or ""
+    jsonString = { modelData: ActiveSupport::JSON.decode(@model_datum.modeldata), texturePath: path }
+    render json: jsonString
+  end
+  def get_stage
+    @stage = Stage.find(params[:id])
+    path = @stage.textures[0].data.url or ""
+    jsonString = { modelData: ActiveSupport::JSON.decode(@stage.scene_data), texturePath: path }
+    render json: jsonString
+  end
 
   private
     # Use callbacks to share common setup or constraints between actions.

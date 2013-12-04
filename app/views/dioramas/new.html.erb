@@ -7,25 +7,9 @@
 </div>
 
 <div id="left-box">
-	<%= javascript_tag do %>
-		window.modelJSON = <%= raw @selectedStage.scene_data %>
-		window.selectedModel = <%= raw @selectedModel.modeldata %>
-		window.selectedModelId = <%= raw @selectedModel.id %>
-		
-		<% unless @selectedStage.textures.empty? %>
-			window.texturePath = "<%= @selectedStageTextures.data.url %>";
-		<% else %>
-			window.texturePath = "";
-		<% end %>
-		<% unless @selectedModel.textures.empty? %>
-			window.modelTexturePath = "<%= @selectedModelTextures.data.url %>";
-		<% else %>
-			window.modelTexturePath = "";
-		<% end %>
-	<% end %>
 	<%= javascript_include_tag "stats.min", "gl-matrix.js", "styledstats", "dioramas", "toon", "dioramacontroller", "dioramaview", "main_creatediorama", "EditorControls", "TrackballControls" %>
 </div>
-<!-- とりあえず表示しているだけ -->
+
 <div id="modelSelectionParent">
 	<h2>ModelData:</h2>
 	

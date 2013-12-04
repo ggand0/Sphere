@@ -14,31 +14,25 @@ class DioramaController
     # jQueryのdeffered queを用いて
     # RailsからJSONデータを持ってきてロードする
     console.log("Begin loading stage...")
-    #console.log(@)
     self = @
     # まずStageを読む
     loadStage.call(this).then(()->
-      # 次に個々のモデルを読む（とりあえず今は１つだけ）
-      console.log("Begin loading modelDatum...")
-      loadModelDatum.call(this).then(()->
-        console.log("Creating view object...")
-        
-        # 最後にデータをViewに渡してscene生成
-        # createなのでモデル追加関連のイベントを追加する
-        dioramaView = new DioramaView(self, dioramaModel.stageData, true)
-        dioramaModel.dioramaView = dioramaView
-        
-        # 描画開始
-        draw.call(this)
-      )
+      console.log("Creating view object...")
+      # 最後にデータをViewに渡してscene生成
+      # createなのでモデル追加関連のイベントを追加する
+      dioramaView = new DioramaView(self, dioramaModel.stageData, true)
+      dioramaModel.dioramaView = dioramaView
+      # 描画開始
+      draw.call(this)
     )
-    
+  
   # stageのJSONデータをSceneLoaderに投げる
   loadStage = () ->
     deferred = new $.Deferred()
     loader = new THREE.SceneLoader()
     
-    loader.parse(modelJSON, (result) ->
+    console.log(window.modelJSON)
+    loader.parse(window.modelJSON, (result) ->
       console.log("StageDatum callback function has been called.")
       dioramaModel.setStageData(result)
       deferred.resolve()
@@ -49,15 +43,14 @@ class DioramaController
   loadModelDatum = () ->
     deferred = new $.Deferred()
     loader = new THREE.SceneLoader()
-    
-    loader.parse(selectedModel, (result) ->
-        console.log("modelDatum callback function has been called.")
-        # sceneで返ってくるのでchildrenを取得
-        #dioramaModel.setModelDatum(result.scene.children[0])
-        dioramaModel.setModelDatum.call(this, result.scene.children[0], selectedModelId)
-        #dioramaModel.setModelDatum.call(this, result.scene.children[0], 0)
-        console.log(dioramaModel.getModelDatum())
-        deferred.resolve()
+    loader.parse(window.selectedModel, (result) ->
+      console.log("modelDatum callback function has been called.")
+      # sceneで返ってくるのでchildrenを取得
+      #dioramaModel.setModelDatum(result.scene.children[0])
+      dioramaModel.setModelDatum.call(this, result.scene.children[0], selectedModelId)
+      #dioramaModel.setModelDatum.call(this, result.scene.children[0], 0)
+      console.log(dioramaModel.getModelDatum())
+      deferred.resolve()
     , modelTexturePath)
     return deferred.promise()
     
@@ -71,19 +64,19 @@ class DioramaController
     # railsで与えられたarray分だけロード[要改善]
     for datum, index in modelDataObj
       loader.parse(datum, (result) ->
-          console.log("modelData callback function has been called. " + loadIndex)
-          loadIndex += 1# メンバ変数のカウンタを使うことにする
-          
-          # sceneで返ってくるのでchildrenを取得
-          #dioramaModel.setModelData.call(this, result.scene.children[0], selectedModelId)# idも要修正
-          dioramaModel.addModelDatum.call(this, result.scene.children[0], 0)# id要修正
-          console.log(dioramaModel.getModelData())
-          
-          # 最後まで読まれたらresolve
-          #if index >= modelDataObj.length-1# ここでindex参照して条件に使っても意味NEEE
-          if loadIndex >= modelDataObj.length
-            deferred.resolve()
-            console.log("loadModelData method has resolved.")
+        console.log("modelData callback function has been called. " + loadIndex)
+        loadIndex += 1# メンバ変数のカウンタを使うことにする
+        
+        # sceneで返ってくるのでchildrenを取得
+        #dioramaModel.setModelData.call(this, result.scene.children[0], selectedModelId)# idも要修正
+        dioramaModel.addModelDatum.call(this, result.scene.children[0], 0)# id要修正
+        console.log(dioramaModel.getModelData())
+        
+        # 最後まで読まれたらresolve
+        #if index >= modelDataObj.length-1# ここでindex参照して条件に使っても意味NEEE
+        if loadIndex >= modelDataObj.length
+          deferred.resolve()
+          console.log("loadModelData method has resolved.")
       , textures[index])
     return deferred.promise()
 
