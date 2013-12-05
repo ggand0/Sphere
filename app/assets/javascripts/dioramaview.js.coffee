@@ -59,7 +59,7 @@ class DioramaView
     console.log(scene)
     
     createScene()
-    addEvents.call(this, enableControl)
+    addEvents(enableControl)
     
 
   # 既に設定されたsceneにいろいろ追加する、シーン生成関数
@@ -315,9 +315,9 @@ class DioramaView
     console.log(dioramaController)
     console.log(dioramaController.addModel)
     
-    addCameraEvents.call(this)
+    addCameraEvents()
     if addControlEvents
-      addModelEvents.call(this)
+      addModelEvents()
         
   
   # シーンにあるオブジェクトのやりとり

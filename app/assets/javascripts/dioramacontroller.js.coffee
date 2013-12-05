@@ -16,14 +16,14 @@ class DioramaController
     console.log("Begin loading stage...")
     self = @
     # まずStageを読む
-    loadStage.call(this).then(()->
+    loadStage().then(()->
       console.log("Creating view object...")
       # 最後にデータをViewに渡してscene生成
       # createなのでモデル追加関連のイベントを追加する
       dioramaView = new DioramaView(self, dioramaModel.stageData, true)
       dioramaModel.dioramaView = dioramaView
       # 描画開始
-      draw.call(this)
+      draw()
     )
   
   # stageのJSONデータをSceneLoaderに投げる
@@ -47,8 +47,8 @@ class DioramaController
       console.log("modelDatum callback function has been called.")
       # sceneで返ってくるのでchildrenを取得
       #dioramaModel.setModelDatum(result.scene.children[0])
-      dioramaModel.setModelDatum.call(this, result.scene.children[0], selectedModelId)
-      #dioramaModel.setModelDatum.call(this, result.scene.children[0], 0)
+      dioramaModel.setModelDatum(result.scene.children[0], selectedModelId)
+      #dioramaModel.setModelDatum(, result.scene.children[0], 0)
       console.log(dioramaModel.getModelDatum())
       deferred.resolve()
     , modelTexturePath)
@@ -60,7 +60,7 @@ class DioramaController
     deferred = new $.Deferred()
     loader = new THREE.SceneLoader()
     
-    console.log("length="+modelDataObj.length)
+    console.log("length=" + modelDataObj.length)
     # railsで与えられたarray分だけロード[要改善]
     for datum, index in modelDataObj
       loader.parse(datum, (result) ->
@@ -68,8 +68,7 @@ class DioramaController
         loadIndex += 1# メンバ変数のカウンタを使うことにする
         
         # sceneで返ってくるのでchildrenを取得
-        #dioramaModel.setModelData.call(this, result.scene.children[0], selectedModelId)# idも要修正
-        dioramaModel.addModelDatum.call(this, result.scene.children[0], 0)# id要修正
+        dioramaModel.addModelDatum(result.scene.children[0], 0)# id要修正
         console.log(dioramaModel.getModelData())
         
         # 最後まで読まれたらresolve
@@ -86,10 +85,9 @@ class DioramaController
     loader.parse(data, (result) ->
       console.log("modelDatum callback function has been called.")
       if result.scene.children.length == 1
-        #dioramaModel.setModelDatum.call(this, result.scene.children[0], undefined)
-        dioramaModel.setModelDatum.call(this, result.scene.children, undefined)
+        dioramaModel.setModelDatum(result.scene.children, undefined)
       else
-        dioramaModel.setModelDatum.call(this, result.scene.children, result.objects)
+        dioramaModel.setModelDatum(result.scene.children, result.objects)
         console.log("current model:")
         console.log(result)
         console.log(dioramaModel.getModelDatum())
@@ -110,20 +108,20 @@ class DioramaController
     #console.log(@)
     self = @
     # まずStageを読む
-    loadStage.call(this).then(()->
+    loadStage().then(()->
       # 次に個々のモデルを読む（とりあえず今は１つだけ）
       console.log("Begin loading modelDatum...")
-      loadModelData.call(this).then(()->
+      loadModelData().then(()->
         console.log("Creating view object...")
         # 最後にデータをViewに渡してscene生成
         # showなのでモデル操作は禁止
         dioramaView = new DioramaView(self, dioramaModel.stageData, false)
         
         console.log("Inserting models...")
-        insertModels.call(this)
+        insertModels()
         
         # 描画開始
-        draw.call(this)
+        draw()
       )
     )
 
@@ -152,9 +150,9 @@ class DioramaController
   handleKeyEvents: (event) =>
     console.log("keyCode = " + event.keyCode)
     if event.keyCode is 100           # Dキー
-      deleteModel.call(this)
+      deleteModel()
     else if event.keyCode is 115      # Sキー
-      console.log(getSelectedModels.call(this))
+      console.log(getSelectedModels())
     else if event.keyCode is 99      # Cキー
       console.log(dioramaModel.getModelData())
     else if event.keyCode is 103      # Gキー
@@ -162,7 +160,7 @@ class DioramaController
     else if event.keyCode is 105      # Iキー
       
     else
-      addModel.call(this, event)
+      addModel(event)
 
   getSelectedModels = () ->
     array = (obj for obj in dioramaView.getAllSceneObjects() when obj.userData['selected'] is true)
@@ -184,7 +182,7 @@ class DioramaController
   addModel = () =>
     # ToDo:dioramaViewがdioramaModelを参照してsceneを更新するようにする
     # 取得したモデルデータをViewが持っているsceneに追加する(Viewのメソッドを呼ぶ形にしたほうが良いかも)
-    meshes = (mesh.clone() for mesh in dioramaModel.getModelDatum().meshData)
+    meshes = (mesh.clone() for mesh in dioramaModel.getModelDatum(@).meshData)
     console.log(meshes)
     
     for mesh in meshes
@@ -235,7 +233,7 @@ class DioramaController
   # ジオラマのモデルの位置データをViewのフォームに入力する
   insertTransforms: (event) ->
     console.log("Inserting transforms to form...")
-    positions = getModelTransforms.call(this)
+    positions = getModelTransforms()
     
     console.log(positions)
     console.log(JSON.stringify(positions))

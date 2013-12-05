@@ -5,21 +5,17 @@
 
 # JSONDataなど１つのモデルに関するデータを格納するクラス。構造体的に使う
 class ModelData
-  data: undefined       # JSONで記述されたモデルデータ　の配列
-  #subData: undefined    # tmp
-  id: undefined         # DB上のID
-  transform: undefined  # 位置ベクトル
-  # Object3D.userData(つまｔりdata.userData)を使うことにする
-  #selected: false       # ユーザによって選択されているかどうか
-  meshData: undefined    # Three.Mesh　の配列
-  dioramaView:undefined
+  data: undefined         # JSONで記述されたモデルデータ　の配列
+  id: undefined           # DB上のID
+  transform: undefined    # 位置ベクトル
+  meshData: undefined     # Three.Mesh　の配列
+  dioramaView: undefined
   
   constructor: (data, id, transform) ->
     @data = data
     @id = id
     @transform = transform
-    generateMesh.call(this)
-    #generateMesh()
+    generateMesh.call(@)
   
   # 取得したデータからMesh生成
   generateMesh = () ->
@@ -82,10 +78,9 @@ class Diorama
 
   addModelDatum: (model) ->
     modelData.push(model)
-  #selectModelDatum: (selectedModel) ->
   removeModels: (targets) ->
     console.log("Removing targets from modelData...")
-    #dels = (obj for obj in modelData.data when obj is t for t in targets)
+    
     dels = (obj for obj in modelData when obj.meshData is t for t in targets)
     console.log(dels)
     indices = (modelData.indexOf(d[0]) for d in dels)
@@ -98,9 +93,7 @@ class Diorama
       
     console.log("Deletion is completed!")
     console.log(modelData)
-    #for d in dels
-    # modelData.remove(d[0])
-    
+
     
   　# setter
   setStageData: (data) ->
