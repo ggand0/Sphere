@@ -21,15 +21,15 @@ $ ->
     deferred = new $.Deferred()
     id = $('#id').text()
 
-    $.ajax({
-      url: 'get_contents/',
-      type: 'GET',
-      data: {
-        id: id
-      },
-    }).then((data) ->
+    $.get(
+      'get_contents',
+      { id: id }
+    ).fail(() ->
+      console.log("$.get failed!")
+    ).then((data) ->
       console.log("request succeed.")
       console.log(data)
+      
       # モデルデータを取得
       window.modelJSON = data['modelData']
  
