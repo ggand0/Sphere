@@ -30,7 +30,7 @@ class DioramaView
   radius = 1000
   theta = 45
   phi = 60
-  enableControl = true          # モデルが選択されている時はカメラ操作をオフにする。そのためのフラグ
+  enableControl = true              # モデルが選択されている時はカメラ操作をオフにする。そのためのフラグ
   
   # Mouse picking関係
   mouseX = undefined
@@ -38,7 +38,7 @@ class DioramaView
   modelObjects = new Array()
   selectedObject = undefined        # マウスで選択されたオブジェクトを格納する
   intersectedObject = undefined
-  plane = undefined             # マウスでオブジェクトを移動する際に使用する平面オブジェクト。不可視
+  plane = undefined                 # マウスでオブジェクトを移動する際に使用する平面オブジェクト。不可視
   offset = new THREE.Vector3()
   
   # コントローラへの参照
@@ -100,8 +100,7 @@ class DioramaView
     geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( - 500, 0, 0 ) ) )
     geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 500, 0, 0 ) ) )
     linesMaterial = new THREE.LineBasicMaterial( 0x000000, 0.2 )
-    #linesMaterial = new THREE.LineBasicMaterial( 0xcccccc, 1.0 )
-    #for ( var i = 0; i <= 20; i ++ ) {
+
     for i in [0..20]
       line = new THREE.Line( geometry, linesMaterial )
       line.position.z = ( i * 50 ) - 500
@@ -152,6 +151,14 @@ class DioramaView
     $debugText.text("#{scene.camera.position.x} #{scene.camera.position.y} #{scene.camera.position.z}")
     #$debugText.text(intersectedObject)
     
+    
+  calculateCameraPos = (theta, phi, radius) ->
+    angle = new THREE.Vector3(
+      Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 ),
+      Math.sin( phi * Math.PI / 360 ),
+      Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
+    )
+    return angle.multiplyScalar(radius)
   
   # カメラ操作関連のイベントを追加する
   addCameraEvents= () ->
@@ -185,12 +192,8 @@ class DioramaView
           phi = ( ( event.originalEvent.clientY - onMouseDownPosition.y ) * 0.5 ) +
                 onMouseDownPhi
           phi = Math.min( 180, Math.max( 0, phi ) )
-    
-          scene.camera.position.x = radius * Math.sin( theta * Math.PI / 360 ) *
-                              Math.cos( phi * Math.PI / 360 )
-          scene.camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
-          scene.camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) *
-                              Math.cos( phi * Math.PI / 360 )
+
+          scene.camera.position = calculateCameraPos(theta, phi, radius)
           scene.camera.updateMatrix()
         mouse3D = projector.unprojectVector(
           new THREE.Vector3(
@@ -200,16 +203,13 @@ class DioramaView
           ),
           scene.camera
         )
-        #ray.direction = mouse3D.subSelf( scene.camera.position ).normalize()
         ray.direction = mouse3D.sub( scene.camera.position ).normalize()
         scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
 
     $(document).on "mousewheel", (event) ->
       if enableControl
         radius -= event.originalEvent.wheelDeltaY
-        scene.camera.position.x = radius * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
-        scene.camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
-        scene.camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
+        scene.camera.position = calculateCameraPos(theta, phi, radius)
         scene.camera.updateMatrix()
         
     
