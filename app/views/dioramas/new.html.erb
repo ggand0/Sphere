@@ -1,21 +1,21 @@
 <%= stylesheet_link_tag "dioramas" %>
 <h1>New diorama</h1>
 
-<div id="site-box">
+<div id="siteBox">
 	<%= render 'form' %>
 	<%= link_to 'Back', dioramas_path %>
 </div>
 
-<div id="left-box">
+<div id="leftBox">
 	<%= javascript_include_tag "stats.min", "gl-matrix.js", "styledstats", "dioramas", "toon", "dioramacontroller", "dioramaview", "main_creatediorama", "EditorControls", "TrackballControls" %>
-</div>
+</div> 
 
 <div id="modelSelectionParent">
 	<h2>ModelData:</h2>
 	
 	<div id="modelSelection">
 		<% @model_data.each do |model_datum| %>
-		  	<div class = "item">
+		  	<div class="item">
 			    <%= model_datum.id %>
 	  		</div>
 		<% end %>

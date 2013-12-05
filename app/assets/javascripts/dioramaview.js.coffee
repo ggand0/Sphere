@@ -6,7 +6,7 @@ class DioramaView
   renderer.setClearColorHex(0xffffff, 1)
   renderer.shadowMapEnabled = true;
   
-  $container = $("#left-box")
+  $container = $("#leftBox")
   $renderer = $(renderer.domElement)
   $container.append($renderer)
 

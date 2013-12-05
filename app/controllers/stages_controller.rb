@@ -37,7 +37,7 @@ class StagesController < ApplicationController
     @stage = Stage.new(scene_data: @jsonstring, title: params[:stage][:title])
 
     unless params[:stage][:texture].nil?
-      @textures = Texture.new(:data => params[:stage][:texture]['data'])
+      @textures = Texture.new(data: params[:stage][:texture]['data'])
       @stage.textures << @textures
     end
 

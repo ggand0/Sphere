@@ -14,10 +14,7 @@ class ModelDataController < ApplicationController
     @data = ActiveSupport::JSON.decode(@model_datum.modeldata)
     @textures = @model_datum.textures
     unless @model_datum.textures.nil?
-      @urls = []
-      for texture in @model_datum.textures
-        @urls << texture.data.url
-      end
+      @urls = @model_datum.textures.map{ |texture| texture.data.url }
     end
   end
 
@@ -81,11 +78,7 @@ class ModelDataController < ApplicationController
     @model_datum = ModelDatum.find(params[:id])
       
     # If modeldata has at least one texture, set the path
-    unless @model_datum.textures.empty?
-      path = @model_datum.textures[0].data.url
-    else
-      path = ""
-    end
+    path = @model_datum.textures[0].data.url or ""
     jsonString = { modelData: ActiveSupport::JSON.decode(@model_datum.modeldata), texturePath: path }
 
     render json: jsonString

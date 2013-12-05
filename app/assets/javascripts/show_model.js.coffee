@@ -36,7 +36,7 @@ $ ->
       # テクスチャのルートパスを取得
       if data['texturePath']
         url = data['texturePath']?.replace(/[^/]+$/g, "")
-        urlBase = url ? url or '' # URLの最後の"/"以下を取得(404回避)
+        urlBase = url ? '' # URLの最後の"/"以下を取得(404回避)
       deferred.resolve()
     )
     return deferred.promise()

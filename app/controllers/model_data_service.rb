@@ -15,7 +15,7 @@ class ModelDataService
     
     # tmpdir内に変換したファイルを出力させる
     Dir.mktmpdir('hoge') do |dir|
-      out_file_path = dir + '/' + ('a'...'z').to_a.shuffle.join() + '.js'
+      out_file_path = File.join(dir, ('a'...'z').to_a.shuffle.join()+'.js')
       
       # JSON形式に変換
       # テクスチャurlに余計なパスが含まれる問題を、変換前ファイルとスクリプトファイルを同階層に置くことで解決している。
