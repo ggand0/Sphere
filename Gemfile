@@ -68,3 +68,6 @@ gem 'pry-rails'
 
 # Testing framework
 gem 'rspec-rails', '>= 2.6.0', group: [:development, :test]
+
+gem 'guard'
+gem 'guard-coffeescript'
