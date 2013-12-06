@@ -14,14 +14,16 @@ class DioramaController
     # jQueryのdeffered queを用いて
     # RailsからJSONデータを持ってきてロードする
     console.log("Begin loading stage...")
-    self = @
+
     # まずStageを読む
-    loadStage().then(()->
+    loadStage().then(() =>
       console.log("Creating view object...")
+      
       # 最後にデータをViewに渡してscene生成
       # createなのでモデル追加関連のイベントを追加する
-      dioramaView = new DioramaView(self, dioramaModel.stageData, true)
+      dioramaView = new DioramaView(@, dioramaModel.stageData, true)
       dioramaModel.dioramaView = dioramaView
+      
       # 描画開始
       draw()
     )
@@ -34,6 +36,7 @@ class DioramaController
     console.log(window.modelJSON)
     loader.parse(window.modelJSON, (result) ->
       console.log("StageDatum callback function has been called.")
+      
       dioramaModel.setStageData(result)
       deferred.resolve()
     , texturePath)
@@ -45,15 +48,14 @@ class DioramaController
     loader = new THREE.SceneLoader()
     loader.parse(window.selectedModel, (result) ->
       console.log("modelDatum callback function has been called.")
+      
       # sceneで返ってくるのでchildrenを取得
-      #dioramaModel.setModelDatum(result.scene.children[0])
       dioramaModel.setModelDatum(result.scene.children[0], selectedModelId)
-      #dioramaModel.setModelDatum(, result.scene.children[0], 0)
       console.log(dioramaModel.getModelDatum())
       deferred.resolve()
     , modelTexturePath)
     return deferred.promise()
-    
+  
   loadIndex = 0
   # showする時にmodelDataを読み込みarrayにセットする
   loadModelData = () ->
@@ -65,14 +67,13 @@ class DioramaController
     for datum, index in modelDataObj
       loader.parse(datum, (result) ->
         console.log("modelData callback function has been called. " + loadIndex)
-        loadIndex += 1# メンバ変数のカウンタを使うことにする
+        loadIndex += 1
         
         # sceneで返ってくるのでchildrenを取得
         dioramaModel.addModelDatum(result.scene.children[0], 0)# id要修正
         console.log(dioramaModel.getModelData())
         
         # 最後まで読まれたらresolve
-        #if index >= modelDataObj.length-1# ここでindex参照して条件に使っても意味NEEE
         if loadIndex >= modelDataObj.length
           deferred.resolve()
           console.log("loadModelData method has resolved.")
@@ -105,18 +106,17 @@ class DioramaController
     # jQueryのdeffered queを用いて
     # RailsからJSONデータを持ってきてロードする
     console.log("Begin loading stage...")
-    #console.log(@)
-    self = @
+
     # まずStageを読む
     loadStage().then(()->
       # 次に個々のモデルを読む（とりあえず今は１つだけ）
       console.log("Begin loading modelDatum...")
-      loadModelData().then(()->
+      loadModelData().then(() =>
         console.log("Creating view object...")
+        
         # 最後にデータをViewに渡してscene生成
         # showなのでモデル操作は禁止
-        dioramaView = new DioramaView(self, dioramaModel.stageData, false)
-        
+        dioramaView = new DioramaView(@, dioramaModel.stageData, false)
         console.log("Inserting models...")
         insertModels()
         
@@ -136,7 +136,6 @@ class DioramaController
     console.log(obj)
     return obj
     
-  
   # 配置されたモデルの位置を取得しarrayに格納して返す
   getModelTransforms = () ->
     array = (stringify(value) for value in dioramaModel.getModelData())
