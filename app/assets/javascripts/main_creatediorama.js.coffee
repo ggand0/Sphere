@@ -19,12 +19,12 @@ $ ->
         console.log(data['id'])
         window.selectedModelId = data['id']
         
-        # テクスチャのルートパスを取得
+        # テクスチャのルートパスを取得する
+        # URLの最後の"/"以下を取得(404回避)
         urlBase = undefined
         if data['url']
           url = data['url'][0]?.replace(/[^/]+$/g, "")
-          urlBase = url or '' # URLの最後の"/"以下を取得(404回避)
-
+          urlBase = url or '' 
         console.log(data['modeldata'])
         controller.reloadModelDatum(data['modeldata'], urlBase)
       )
@@ -42,9 +42,10 @@ $ ->
       console.log(window.modelJSON)
  
       # テクスチャのルートパスを取得
+      # URLの最後の"/"以下を取得(404回避)
       if data['texturePath']
         url = data['texturePath']?.replace(/[^/]+$/g, "")
-        window.texturePath = url ? '' # URLの最後の"/"以下を取得(404回避)
+        window.texturePath = url ? ''
       deferred.resolve()
     )
     return deferred.promise()

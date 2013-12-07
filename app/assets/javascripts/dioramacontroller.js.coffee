@@ -3,6 +3,13 @@ class DioramaController
   dioramaModel = undefined  # データを格納するだけの機能を持つモデル
   dioramaView = undefined   # Scene生成やイベント周りを担当するビューオブジェクト
   loaded = false
+  loadIndex = 0
+  ADD_MODEL_KEY = 100
+  DELETE_MODEL_KEY = 100
+  GET_SELECTED_KEY = 115
+  GET_MODELDATA_KEY = 99
+  GET_SCENE_KEY = 103
+  
 
   # ここではグローバルで与えられたJSONデータをロードし、
   # それらを用いてModelとView(Scene)生成するまでを行う
@@ -36,41 +43,25 @@ class DioramaController
     console.log(window.modelJSON)
     loader.parse(window.modelJSON, (result) ->
       console.log("StageDatum callback function has been called.")
-      
       dioramaModel.setStageData(result)
       deferred.resolve()
     , texturePath)
     return deferred.promise()
 
-  # modelDatumのJSONデータをSceneLoaderに投げる
-  loadModelDatum = () ->
-    deferred = new $.Deferred()
-    loader = new THREE.SceneLoader()
-    loader.parse(window.selectedModel, (result) ->
-      console.log("modelDatum callback function has been called.")
-      
-      # sceneで返ってくるのでchildrenを取得
-      dioramaModel.setModelDatum(result.scene.children[0], selectedModelId)
-      console.log(dioramaModel.getModelDatum())
-      deferred.resolve()
-    , modelTexturePath)
-    return deferred.promise()
-  
-  loadIndex = 0
   # showする時にmodelDataを読み込みarrayにセットする
   loadModelData = () ->
     deferred = new $.Deferred()
     loader = new THREE.SceneLoader()
-    
     console.log("length=" + modelDataObj.length)
+    
     # railsで与えられたarray分だけロード[要改善]
     for datum, index in modelDataObj
       loader.parse(datum, (result) ->
-        console.log("modelData callback function has been called. " + loadIndex)
+        console.log("modelData callback function has been called." + loadIndex)
         loadIndex += 1
         
         # sceneで返ってくるのでchildrenを取得
-        dioramaModel.addModelDatum(result.scene.children[0], 0)# id要修正
+        dioramaModel.addModelDatum(result.scene.children[0], selectedModelId)
         console.log(dioramaModel.getModelData())
         
         # 最後まで読まれたらresolve
@@ -80,15 +71,15 @@ class DioramaController
       , textures[index])
     return deferred.promise()
 
-  # modelDatumをモデルにセットし直す
-  reloadModelDatum : (data, path) ->
+  # modelDatumをモデルにセットし直す。create時に使用
+  reloadModelDatum: (data, path) ->
     loader = new THREE.SceneLoader()
     loader.parse(data, (result) ->
       console.log("modelDatum callback function has been called.")
       if result.scene.children.length == 1
-        dioramaModel.setModelDatum(result.scene.children, undefined)
+        dioramaModel.setModelDatum(result.scene.children, selectedModelId)
       else
-        dioramaModel.setModelDatum(result.scene.children, result.objects)
+        dioramaModel.setModelDatum(result.scene.children, selectedModelId)
         console.log("current model:")
         console.log(result)
         console.log(dioramaModel.getModelDatum())
@@ -124,47 +115,20 @@ class DioramaController
         draw()
       )
     )
-
-  
-  # 内包表記用の関数
-  # タプルを返すように変更
-  stringify = (value) ->
-    obj = new Object()
-    obj.id = value.id
-    obj.pos = value.transform.toArray()
-    console.log("obj:")
-    console.log(obj)
-    return obj
     
-  # 配置されたモデルの位置を取得しarrayに格納して返す
-  getModelTransforms = () ->
-    array = (stringify(value) for value in dioramaModel.getModelData())
-    return array
-    
-  # モデルの位置情報とIDを取得してarrayに格納しreturnする
-  getModelData = () ->
-    array = []
-
-
   handleKeyEvents: (event) =>
     console.log("keyCode = " + event.keyCode)
-    if event.keyCode is 100           # Dキー
+    if event.keyCode is DELETE_MODEL_KEY            # Dキー
       deleteModel()
-    else if event.keyCode is 115      # Sキー
+    else if event.keyCode is GET_SELECTED_KEY       # Sキー
       console.log(getSelectedModels())
-    else if event.keyCode is 99      # Cキー
+    else if event.keyCode is GET_MODELDATA_KEY     # Cキー
       console.log(dioramaModel.getModelData())
-    else if event.keyCode is 103      # Gキー
+    else if event.keyCode is GET_SCENE_KEY          # Gキー
       console.log(dioramaView.getScene())
-    else if event.keyCode is 105      # Iキー
-      
     else
       addModel(event)
-
-  getSelectedModels = () ->
-    array = (obj for obj in dioramaView.getAllSceneObjects() when obj.userData['selected'] is true)
-    return array
-
+  
   # モデルをSceneとmodelDataから削除する
   deleteModel = () =>
     console.log("Deleting models...")
@@ -179,32 +143,56 @@ class DioramaController
 
   # モデルをジオラマのシーンに追加する
   addModel = () =>
-    # ToDo:dioramaViewがdioramaModelを参照してsceneを更新するようにする
-    # 取得したモデルデータをViewが持っているsceneに追加する(Viewのメソッドを呼ぶ形にしたほうが良いかも)
-    meshes = (mesh.clone() for mesh in dioramaModel.getModelDatum(@).meshData)
-    console.log(meshes)
+    # まず、新規にModelDataを生成してDioramaModelに追加
+    # ToDo:ModelData.clone()を実装する
+    tmp = dioramaModel.getModelDatum()
+    newModel = new ModelData(tmp.meshData, tmp.id, new THREE.Vector3(0,0,0))
+    console.log(newModel)
+    dioramaModel.addModelDatum(newModel, tmp.id)
     
+    # 続いてDioramaViewに追加
+    meshes = (mesh.clone() for mesh in dioramaModel.getModelDatum(@).meshData)
     for mesh in meshes
-      # Sceneに追加
       mesh.castShadow = true
       dioramaView.addModelToScene(mesh)
-      # Dioramaに追加
-      #newModel = new ModelData(selectedModelMesh.data, selectedModelId, mesh.position)
-      m = []
-      m.push(mesh.data)
-      newModel = new ModelData(m, selectedModelId, mesh.position)
-      dioramaModel.addModelDatum(newModel)
-      console.log(newModel)
 
-    # Dioramaにも追加
-    ###selectedModelMesh = dioramaModel.getModelDatum()
-    newModel = new ModelData(selectedModelMesh.data, selectedModelId, newMesh.position)
-    dioramaModel.addModelDatum(newModel)
-    console.log(newModel)###
   
-  
+  # 内包表記用の関数
+  # タプルを返すように変更
+  stringify = (value) ->
+    obj = new Object()
+    obj.id = value.id
+    #obj.pos = value.transform.toArray()
+    obj.pos = value.meshData[0].position.toArray()
+    console.log("obj:")
+    console.log(obj)
+    return obj
+    
+  # 配置されたモデルの位置を取得しarrayに格納して返す
+  getModelTransforms = () ->
+    array = (stringify(value) for key, value of dioramaModel.getModelData())
+    return array
+    
+  # Viewで動かしたモデルの位置をModelに反映する。
+  # 個別に毎回保存しないでまとめて反映してもいいかも
+  updateModelTransforms = (id, subId, newPosition) ->
+    dioramaModel.modelData[id].meshData[subId].transform = newPosition
+
+  getSelectedModels = () ->
+    array = (obj for obj in dioramaView.getAllSceneObjects() when obj.userData['selected'] is true)
+    return array
+
+  # ジオラマのモデルの位置データをViewのフォームに入力する
+  insertTransforms: (event) ->
+    console.log("Inserting transforms to form...")
+    positions = getModelTransforms()
+    console.log(positions)
+    console.log(JSON.stringify(positions))
+    $(document).ready () ->
+      $("#transforms_field").val(JSON.stringify(positions))
+      
   # 既存のジオラマをshowする時に、modelTransformsで与えられた位置にモデルを配置する
-  insertModels =  () =>
+  insertModels = () =>
     console.log("positions:")
     console.log(modelTransforms)# rails側から指定するグローバル変数
     
@@ -214,51 +202,15 @@ class DioramaController
       positions.push(JSON.parse(obj))
     )
     console.log(positions)
-
     data = dioramaModel.getModelData()
+    
     # modelTransformsで与えられる位置に配置する 
     for value, index in positions
       newMesh = new THREE.Mesh( data[index].geometry,
         data[index].material)
       newMesh.scale = new THREE.Vector3(10, 10, 10)
-      
-      pos = new THREE.Vector3().fromArray(value)
-      console.log(pos)
-      
-      newMesh.position = pos
+      newMesh.position = new THREE.Vector3().fromArray(value)
       dioramaView.addModelToScene(newMesh)
-  
-
-  # ジオラマのモデルの位置データをViewのフォームに入力する
-  insertTransforms: (event) ->
-    console.log("Inserting transforms to form...")
-    positions = getModelTransforms()
-    
-    console.log(positions)
-    console.log(JSON.stringify(positions))
-    
-    $(document).ready () ->
-      $("#transforms_field").val(JSON.stringify(positions))
       
-
-  # Railsのcontroller内のactionにデータを送るテスト
-  send= (event) ->
-    console.log(scene.objects)
-    console.log(scene.scene.children)
-    console.log("begin ajax request.")
-    ### 未移植
-    $.ajax({
-      url: 'ready',
-      type: 'POST',
-      data: {
-        code: getModelTransforms()
-        #code: "data from javascript."
-      },
-      success: (data, event, status, xhr) ->
-        console.log("request succeed.")
-      ,error: (event, data, status, xhr) ->
-        console.log("request failed.")
-    })
-    ###
     
 window.DioramaController = window.DioramaController or DioramaController

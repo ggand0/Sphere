@@ -51,13 +51,7 @@ class DioramaView
     dioramaController = controller
     scene = stageData
     scene.scene = new THREE.Scene()
-    
-    console.log("dioramaView's scene:")
-    console.log(controller)
-    console.log(dioramaController)
-    console.log(stageData)
-    console.log(scene)
-    
+
     createScene()
     addEvents(enableControl)
     
@@ -151,7 +145,7 @@ class DioramaView
     $debugText.text("#{scene.camera.position.x} #{scene.camera.position.y} #{scene.camera.position.z}")
     #$debugText.text(intersectedObject)
     
-    
+  
   calculateCameraPos = (theta, phi, radius) ->
     angle = new THREE.Vector3(
       Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 ),
@@ -161,7 +155,7 @@ class DioramaView
     return angle.multiplyScalar(radius)
   
   # カメラ操作関連のイベントを追加する
-  addCameraEvents= () ->
+  addCameraEvents = () ->
     $(document).on "mousedown", (event) ->
       # Camera control
       isMouseDown = true
@@ -214,7 +208,7 @@ class DioramaView
         
     
   # モデル追加・操作関連のイベントを追加する
-  addModelEvents= () ->
+  addModelEvents = () ->
     $(document).on "mousedown", (event) ->
     #$container.on "mousedown", (event) ->
       # Picking ray detection
@@ -231,8 +225,7 @@ class DioramaView
       raycaster = new THREE.Raycaster( scene.camera.position,
         vector.sub( scene.camera.position ).normalize() )
       intersects = raycaster.intersectObjects(modelObjects)
-  
-      console.log(intersects)
+      #console.log(intersects)
       
       # 何かと交差していたら、対象を選択中のオブジェクトとしてselectedObjectへ保存する
       if intersects.length > 0
@@ -247,9 +240,8 @@ class DioramaView
               obj.userData = { selected: false }
             else
               obj.userData = { selected: true }
-        
-        
         console.log(selectedObject)
+        
         # from sample
         intersects = raycaster.intersectObject( plane )
         offset.copy( intersects[0].point ).sub( plane.position )
@@ -279,7 +271,7 @@ class DioramaView
       projector.unprojectVector( vector, scene.camera )
       raycaster = new THREE.Raycaster( scene.camera.position, vector.sub( scene.camera.position ).normalize() )
       if selectedObject
-        console.log(selectedObject)
+        #console.log(selectedObject)
         # planeはカメラ方向を向かせているので絶対交差するはず
         intersects = raycaster.intersectObject( plane )
         selectedObject.position.copy( intersects[0].point.sub( offset ) )
@@ -289,7 +281,6 @@ class DioramaView
       if intersects.length > 0
         if intersectedObject isnt intersects[0].object
           intersectedObject = intersects[0].object
-
 
           # オブジェクトを動かす基準にする平面を、カメラの方へ向ける（並行に置く）
           plane.position.copy( intersectedObject.position )
@@ -310,7 +301,7 @@ class DioramaView
     
 
   # マウスイベントを追加する
-  addEvents= (addControlEvents) ->
+  addEvents = (addControlEvents) ->
     console.log("Adding events...")
     console.log(dioramaController)
     console.log(dioramaController.addModel)
