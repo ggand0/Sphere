@@ -1,14 +1,16 @@
 # 通信やDiorama操作周りを(中で)担当する
 class DioramaController
-  dioramaModel = undefined  # データを格納するだけの機能を持つモデル
-  dioramaView = undefined   # Scene生成やイベント周りを担当するビューオブジェクト
-  loaded = false
-  loadIndex = 0
   ADD_MODEL_KEY = 100
   DELETE_MODEL_KEY = 100
   GET_SELECTED_KEY = 115
   GET_MODELDATA_KEY = 99
   GET_SCENE_KEY = 103
+  
+  dioramaModel = undefined  # データを格納するだけの機能を持つモデル
+  dioramaView = undefined   # Scene生成やイベント周りを担当するビューオブジェクト
+  loaded = false
+  loadIndex = 0
+  
   
 
   # ここではグローバルで与えられたJSONデータをロードし、
@@ -100,13 +102,13 @@ class DioramaController
 
     # まずStageを読む
     loadStage().then(()->
-      # 次に個々のモデルを読む（とりあえず今は１つだけ）
+      # 次に個々のモデルを読む
       console.log("Begin loading modelDatum...")
       loadModelData().then(() =>
         console.log("Creating view object...")
         
         # 最後にデータをViewに渡してscene生成
-        # showなのでモデル操作は禁止
+        # showなのでモデル操作は禁止する
         dioramaView = new DioramaView(@, dioramaModel.stageData, false)
         console.log("Inserting models...")
         insertModels()
@@ -122,40 +124,42 @@ class DioramaController
       deleteModel()
     else if event.keyCode is GET_SELECTED_KEY       # Sキー
       console.log(getSelectedModels())
-    else if event.keyCode is GET_MODELDATA_KEY     # Cキー
+    else if event.keyCode is GET_MODELDATA_KEY      # Cキー
+      console.log('dioramaModel.modelData:')
       console.log(dioramaModel.getModelData())
     else if event.keyCode is GET_SCENE_KEY          # Gキー
       console.log(dioramaView.getScene())
     else
       addModel(event)
   
-  # モデルをSceneとmodelDataから削除する
+  
+  # MeshをDioramaに追加する
+  addModel = () =>
+    # TODO: ModelData.clone()を実装する
+    # 新規にModelDataを生成してModelに追加
+    tmp = dioramaModel.getModelDatum()
+    id = dioramaModel.addModelDatum(tmp.data)
+    
+    # 続いてViewに追加
+    model = getModel(id)
+    for mesh in model.meshData
+      dioramaView.addModelToScene(mesh.clone())
+
+  getModel = (id) ->
+    return (model for model in dioramaModel.modelData when model.id is id)[0]
+  
+  # ViewのMeshの選択状態の変更をModelに反映する
+  selectModel: (id) ->
+    target = (data for data in dioramaModel.modelData when data.id is id)
+    # idはModelData個別
+    for t in target
+      t.meshData[0].userData['selected'] = !t.meshData[0].userData['selected']
+    
+  # 選択されたMeshをSceneとmodelDataから削除する
   deleteModel = () =>
     console.log("Deleting models...")
-    # 選択されているモデルを削除
-    # 選択されていないモデルだけ残してセットし直す
-    array = getSelectedModels()
-    dioramaView.removeModels(array)
-        
-    # modelData側でも同様に消す、もう少し効率良くしたい
-    #dioramaModel.setModelData(dioramaView.getSceneObjects())
-    dioramaModel.removeModels(array)
-
-  # モデルをジオラマのシーンに追加する
-  addModel = () =>
-    # まず、新規にModelDataを生成してDioramaModelに追加
-    # ToDo:ModelData.clone()を実装する
-    tmp = dioramaModel.getModelDatum()
-    newModel = new ModelData(tmp.meshData, tmp.id, new THREE.Vector3(0,0,0))
-    console.log(newModel)
-    dioramaModel.addModelDatum(newModel, tmp.id)
-    
-    # 続いてDioramaViewに追加
-    meshes = (mesh.clone() for mesh in dioramaModel.getModelDatum(@).meshData)
-    for mesh in meshes
-      mesh.castShadow = true
-      dioramaView.addModelToScene(mesh)
-
+    dioramaModel.deleteModels() # modelData(Model)から削除
+    dioramaView.deleteModels()  # Scene(View)から削除
   
   # 内包表記用の関数
   # タプルを返すように変更
@@ -208,7 +212,7 @@ class DioramaController
     for value, index in positions
       newMesh = new THREE.Mesh( data[index].geometry,
         data[index].material)
-      newMesh.scale = new THREE.Vector3(10, 10, 10)
+      newMesh.scale = new THREE.Vector3(10,10,10)
       newMesh.position = new THREE.Vector3().fromArray(value)
       dioramaView.addModelToScene(newMesh)
       

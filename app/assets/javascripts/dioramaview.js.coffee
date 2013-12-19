@@ -236,10 +236,9 @@ class DioramaView
         # 選択フラグを操作
         for obj in scene.scene.children
           if obj is selectedObject
-            if obj.userData['selected'] is true
-              obj.userData = { selected: false }
-            else
-              obj.userData = { selected: true }
+            obj.userData['selected'] = !obj.userData['selected']
+            # Modelに反映する
+            dioramaController.selectModel(obj.userData['id'])
         console.log(selectedObject)
         
         # from sample
@@ -315,15 +314,14 @@ class DioramaView
   addModelToScene: (newMesh) ->
     scene.scene.add(newMesh)
     modelObjects.push(newMesh)
-  removeModel: (target) ->
+  deleteModel: (target) ->
     for obj in scene.scene.children
       if obj is target
         scene.scene.remove(obj)
-  removeModels: (targets) ->
-    dels = (obj for obj in scene.scene.children when obj is t for t in targets)
-    console.log(dels)
+  deleteModels: () ->
+    dels = (obj for obj in scene.scene.children when obj.userData['selected'])
     for d in dels
-      scene.scene.remove(d[0])
+      scene.scene.remove(d)
       
   getAllSceneObjects: () ->
     return scene.scene.children

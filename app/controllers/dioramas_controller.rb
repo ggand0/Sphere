@@ -57,16 +57,6 @@ class DioramasController < ApplicationController
   # GET /dioramas/1/edit
   def edit
   end
-
-  # [未使用]
-  def ready
-    render :nothing => true
-    @isReady = true
-
-    for position in params[:code] do
-      @trans = ModelTransform.new(:transform => position)
-    end
-  end
   
   # JS側で指定されたIDのモデルデータをセットする
   def set_model
@@ -80,14 +70,14 @@ class DioramasController < ApplicationController
     session[:stage_id] = DEF_STAGE_ID
     session[:model_id] = params[:id]
 
-    render :action => "new"
+    render action: "new"
   end
   
   
   # POST /dioramas
   # POST /dioramas.json
   def create
-    @diorama = Diorama.new(:title => params[:diorama][:title])
+    @diorama = Diorama.new(title: params[:diorama][:title])
 
     # Stage追加
     @diorama.stage = Stage.find(session[:stage_id])
@@ -98,7 +88,7 @@ class DioramasController < ApplicationController
     
     for position in posArray do
       # convert array to string
-      @transform = ModelTransform.new(:transform => position['pos'].to_s)
+      @transform = ModelTransform.new(transform: position['pos'].to_s)
       @diorama.model_transforms << @transform
       @diorama.model_datum << ModelDatum.find(position['id'])
     end

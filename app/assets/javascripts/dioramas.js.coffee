@@ -5,8 +5,9 @@
 
 # JSONDataなど１つのモデルに関するデータを格納するクラス。構造体的に使う
 class ModelData
+  DEF_SCALE = new THREE.Vector3(10,10,10)
   data: undefined         # parseされたTHREE.Mesh(オリジナル)の配列
-  id: undefined           # DB上のID
+  id: undefined           # 識別ID(Diorama.modelDataへ追加時に設定される)
   transform: undefined    # 位置ベクトル
   meshData: undefined     # シーンとやりとりするのに使う（リアルタイムな位置情報を持ってる）Three.Meshの配列
   
@@ -16,55 +17,75 @@ class ModelData
     @transform = transform
     generateMesh.call(@)
   
-  # 取得したデータからMesh生成
+  # 取得したMeshを調整したMeshを生成する
   generateMesh = () ->
     @meshData = []
     for d, index in @data
       newMesh = new THREE.Mesh( d.geometry, d.material)
-      newMesh.scale = new THREE.Vector3(10, 10, 10)
-      newMesh.position = d.position#@transforms
-      newMesh.userData = { selected: false, subId: index }
+      newMesh.scale = DEF_SCALE
+      newMesh.position = d.position
+      newMesh.userData = { selected: false, id: @id, subId: index }
+      newMesh.castShadow = true
       @meshData.push(newMesh)
 
 
-# ジオラマが持つJSONDataの集合
+# Stageと、ユーザーに追加されたModelDataのMeshをまとめるジオラマクラス。
 class Diorama
   # プロパティでもいいかも
-  stageData: undefined    # Stageを格納する変数
-  modelDatum = undefined  # 現在追加しようとしている（単一の）モデル
-  modelData = []          # 現在ジオラマ上に存在しているModelDataのArray
+  stageData: undefined      # Stageを格納する変数
+  modelDatum = undefined    # 現在追加しようとしている（単一の）モデル
+  modelData: []             # 現在ジオラマ上に存在しているModelDataのArray
+  id = -1                   # 追加されたModelDataのID
 
   constructor: () ->
 
-  addModelDatum: (model, id) ->
-    #modelData.push(model)
-    modelData[id] = model
-  removeModels: (targets) ->
-    console.log("Removing targets from modelData...")
-    dels = (obj for obj in modelData when obj.meshData is t for t in targets)
-    indices = (modelData.indexOf(d[0]) for d in dels)
+  # modelDataにmodelを追加する
+  addModelDatum: (data) ->
+    #@modelData['id'+id.toString()] = model
+    id++
+    @modelData.push( new ModelData(data, id, new THREE.Vector3(0,0,0)) )
+    return id
+  
+  getIndices = (meshData, mesh) ->
+    return { dataId: @modelData.indexOf(meshData), meshId: meshData.indexOf(mesh) }
+  
+  # TODO: Mesh単位の削除に対応する
+  selected = (data) ->
+    for mesh in data.meshData
+      if mesh.userData['selected']
+        return true
+    return false
+  
+  # @modelDataから対象を削除する
+  # targets:削除対象ModelDataのリスト
+  # TODO: Mesh単位の削除に対応する
+  # TODO: Controllerに処理を移す
+  deleteModels: () ->
+    console.log("Removing targets from @modelData...")
+    #dels = (getIndices(meshData, mesh) for mesh in data.meshData for data in @modelData when mesh.userData.selected)
     
-    for i in indices
-      modelData.splice(i[0], 1)
-      
-    console.log("Deletion is completed!")
-    console.log(modelData)
+    # 選択されていないdataだけ残したmodelDataを新たに設定する
+    newModelData = @modelData.filter(
+      (data) ->
+        return !selected(data)
+    )
+    @setModelData(newModelData)
 
-    
-  　# setter
+  
+  　# Setter
   setStageData: (data) ->
     console.log("Setting stageData...")
     @stageData = data
   setModelDatum: (data, id) ->
     modelDatum = new window.ModelData(data, id, new THREE.Vector3(0,0,0))
   setModelData: (data) ->
-    modelData = data
+    @modelData = data
   
-  # getter
+  # Getter
   getStageData: () ->
     return stageData
   getModelData: () ->
-    return modelData
+    return @modelData
   getModelDatum: () ->
     return modelDatum
 
