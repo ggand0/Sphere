@@ -27,5 +27,5 @@ Model::Application.configure do
   # number of complex assets.
   config.assets.debug = true
   
-  BetterErrors::Middleware.allow_ip! '192.168.100.3'
+  BetterErrors::Middleware.allow_ip! '192.168.100.2'
 end

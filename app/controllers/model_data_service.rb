@@ -33,9 +33,8 @@ class ModelDataService
     # ModelDatumを生成して返す
     model_datum = ModelDatum.new(modeldata: jsonstring, title: params[:model_datum][:title])
     unless params[:model_datum][:texture].nil?
-      params[:model_datum][:texture][:model_datum][:textures].each do |file|
-        texture = Texture.new(data: file)
-        model_datum.textures << texture
+      params[:model_datum][:texture][:model_datum][:textures].each do |f|
+        model_datum.textures << Texture.new(data: f)
       end
     end
     

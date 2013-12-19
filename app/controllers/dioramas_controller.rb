@@ -15,23 +15,13 @@ class DioramasController < ApplicationController
   def show
     @stageTextures = @diorama.stage.textures[0]
     @selectedModel = @diorama.model_datum[0]
-    
-    @positions = []
-    for model_transform in @diorama.model_transforms do
-      if (model_transform.transform != nil)
-        @positions << model_transform.transform
-      end
+    @positions = @diorama.model_transforms.map do |model_transform|
+      model_transform.transform unless model_transform.transform.nil?
     end
     
-    @ids = []
-    @modelData = []
-    @textures = []
-    # ひとまず使用されてるmodeldata全部突っ込む仕様で。後々重複を避けるように変更する
-    for model_datum in @diorama.model_datum do
-      @ids << model_datum.id
-      @modelData << model_datum.modeldata
-      @textures << model_datum.textures[0]
-    end
+    @ids = @diorama.model_datum.map { |model_datum| model_datum.id }
+    @modelData = @diorama.model_datum.map { |model_datum| model_datum.modeldata}
+    @textures = @diorama.model_datum.map { |model_datum| model_datum.textures[0] }
   end
 
   # GET /dioramas/new
@@ -86,7 +76,7 @@ class DioramasController < ApplicationController
     tmp = params[:diorama][:model_transforms_attributes]['0']['transform']
     posArray = ActiveSupport::JSON.decode(tmp)
     
-    for position in posArray do
+    posArray.each do |position|
       # convert array to string
       @transform = ModelTransform.new(transform: position['pos'].to_s)
       @diorama.model_transforms << @transform
