@@ -8,12 +8,14 @@ class ModelData
   DEF_SCALE = new THREE.Vector3(10,10,10)
   data: undefined         # parseされたTHREE.Mesh(オリジナル)の配列
   id: undefined           # 識別ID(Diorama.modelDataへ追加時に設定される)
+  modelId: undefined      # ModelDataのDB上のID
   transform: undefined    # 位置ベクトル
   meshData: undefined     # シーンとやりとりするのに使う（リアルタイムな位置情報を持ってる）Three.Meshの配列
   
-  constructor: (data, id, transform) ->
+  constructor: (data, id, modelId, transform) ->
     @data = data
     @id = id
+    @modelId = modelId
     @transform = transform
     generateMesh.call(@)
   
@@ -43,7 +45,7 @@ class Diorama
   addModelDatum: (data) ->
     #@modelData['id'+id.toString()] = model
     id++
-    @modelData.push( new ModelData(data, id, new THREE.Vector3(0,0,0)) )
+    @modelData.push( new ModelData(data, id, selectedModelId, new THREE.Vector3(0,0,0)) )
     return id
   
   getIndices = (meshData, mesh) ->
@@ -77,7 +79,7 @@ class Diorama
     console.log("Setting stageData...")
     @stageData = data
   setModelDatum: (data, id) ->
-    modelDatum = new window.ModelData(data, id, new THREE.Vector3(0,0,0))
+    modelDatum = new window.ModelData(data, id, selectedModelId, new THREE.Vector3(0,0,0))
   setModelData: (data) ->
     @modelData = data
   

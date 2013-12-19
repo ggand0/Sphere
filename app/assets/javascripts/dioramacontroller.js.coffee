@@ -165,7 +165,7 @@ class DioramaController
   # タプルを返すように変更
   stringify = (value) ->
     obj = new Object()
-    obj.id = value.id
+    obj.id = value.modelId
     #obj.pos = value.transform.toArray()
     obj.pos = value.meshData[0].position.toArray()
     console.log("obj:")
