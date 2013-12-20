@@ -27,5 +27,8 @@ Model::Application.configure do
   # number of complex assets.
   config.assets.debug = true
   
-  BetterErrors::Middleware.allow_ip! '192.168.100.2'
+  # lib/development.local.sample.rbをリネームし、
+  # Local::IPの値を開発マシンIPに書き換える
+  require "#{Rails.root}/lib/development.local.rb"
+  BetterErrors::Middleware.allow_ip! Local::IP if Local::IP
 end

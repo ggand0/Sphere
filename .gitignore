@@ -25,3 +25,5 @@ Gemfile.lock
 /app/assets/javascripts/bak
 /my_data/bak
 
+# Ignore local setting file
+lib/development.local.rb
