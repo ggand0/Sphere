@@ -36,7 +36,7 @@ class ModelDataController < ApplicationController
     # コンバート&モデル作成
     converter = ModelDataService.new()
     @model_datum = converter.convert_model_datum(params)
-    
+
     # saveしてDBへ保存
     respond_to do |format|
       if @model_datum.save!

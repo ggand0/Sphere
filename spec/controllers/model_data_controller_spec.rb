@@ -23,7 +23,9 @@ describe ModelDataController do
   # This should return the minimal set of attributes required to create a valid
   # ModelDatum. As you add validations to ModelDatum, be sure to
   # adjust the attributes here as well.
-  let(:valid_attributes) { {  } }
+  let(:valid_attributes) {{
+    file: fixture_file_upload('files/notexture.fbx')
+  }}
 
   # This should return the minimal set of values that should be in the session
   # in order to pass any filters (e.g. authentication) defined in
@@ -31,37 +33,47 @@ describe ModelDataController do
   let(:valid_session) { {} }
 
   describe "POST create" do
+    before :each do
+      # http://apidock.com/rails/ActionDispatch/TestProcess/fixture_file_upload
+      @file = fixture_file_upload('files/notexture.fbx')
+    end
+
     describe "with valid params" do
       it "creates a new ModelDatum" do
         expect {
-          post :create, {:model_datum => valid_attributes}, valid_session
+          post :create, model_datum: valid_attributes
         }.to change(ModelDatum, :count).by(1)
       end
 
       it "assigns a newly created model_datum as @model_datum" do
-        post :create, {:model_datum => valid_attributes}, valid_session
+        post :create, { model_datum: valid_attributes }, valid_session
         assigns(:model_datum).should be_a(ModelDatum)
         assigns(:model_datum).should be_persisted
       end
 
       it "redirects to the created model_datum" do
-        post :create, {:model_datum => valid_attributes}, valid_session
+        post :create, { model_datum: valid_attributes }, valid_session
         response.should redirect_to(ModelDatum.last)
       end
     end
 
     describe "with invalid params" do
-      it "assigns a newly created but unsaved model_datum as @model_datum" do
+      #it "assigns a newly created but unsaved model_datum as @model_datum" do
+      it "raise an error when @model_datum is not saved" do
         # Trigger the behavior that occurs when invalid params are submitted
         ModelDatum.any_instance.stub(:save).and_return(false)
-        post :create, {:model_datum => {  }}, valid_session
-        assigns(:model_datum).should be_a_new(ModelDatum)
+        post :create, { model_datum: valid_attributes }, valid_session
+        puts 'debug'
+        puts assigns(:model_datum)
+        #assigns(:model_datum).should be_a_new(ModelDatum)
+        expect { raise }.to raise_error
       end
 
       it "re-renders the 'new' template" do
         # Trigger the behavior that occurs when invalid params are submitted
         ModelDatum.any_instance.stub(:save).and_return(false)
-        post :create, {:model_datum => {  }}, valid_session
+        post :create, { model_datum: valid_attributes }, valid_session
+        puts :model_datum
         response.should render_template("new")
       end
     end
