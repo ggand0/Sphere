@@ -152,7 +152,7 @@ class DioramaView
       Math.sin( phi * Math.PI / 360 ),
       Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
     )
-    return angle.multiplyScalar(radius)
+    return angle.multiplyScalar(radius) # 全ての成分をraidus倍して返す
   
   # カメラ操作関連のイベントを追加する
   addCameraEvents = () ->
@@ -225,7 +225,6 @@ class DioramaView
       raycaster = new THREE.Raycaster( scene.camera.position,
         vector.sub( scene.camera.position ).normalize() )
       intersects = raycaster.intersectObjects(modelObjects)
-      #console.log(intersects)
       
       # 何かと交差していたら、対象を選択中のオブジェクトとしてselectedObjectへ保存する
       if intersects.length > 0
@@ -247,9 +246,6 @@ class DioramaView
         
             
     $(document).on "mouseup", (event) ->
-      console.log("mouseup")
-      console.log(intersectedObject)
-      
       # Mouse picking
       if intersectedObject
         plane.position.copy( intersectedObject.position )
@@ -270,10 +266,10 @@ class DioramaView
       projector.unprojectVector( vector, scene.camera )
       raycaster = new THREE.Raycaster( scene.camera.position, vector.sub( scene.camera.position ).normalize() )
       if selectedObject
-        #console.log(selectedObject)
         # planeはカメラ方向を向かせているので絶対交差するはず
         intersects = raycaster.intersectObject( plane )
         selectedObject.position.copy( intersects[0].point.sub( offset ) )
+        dioramaController.updateModel(selectedObject.userData['id'], selectedObject.position)
         return
         
       intersects = raycaster.intersectObjects( modelObjects )
@@ -287,16 +283,9 @@ class DioramaView
       else
         intersectedObject = null
 
-    
     # その他のイベントを追加
     $('body').on('dblclick', dioramaController.insertTransforms)
     $("body").keypress(dioramaController.handleKeyEvents)
-   
-    console.log("SELECTOR TEST ")
-    console.log(renderer.context)
-    console.log($("#left-box"))
-    console.log($('body'))
-      
     
 
   # マウスイベントを追加する
@@ -332,6 +321,7 @@ class DioramaView
     return scene;
   setSceneObjects: (objects) ->
     scene.scene.children = objects
+
 
 
 namespace = (target, name, block) ->

@@ -41,7 +41,11 @@ class DioramaController
       loader.parse(datum, (result) ->
         console.log("modelData callback function has been called." + loadIndex)
         # sceneで返ってくるのでchildrenを取得
-        dioramaModel.addModelDatum(result.scene.children, modelDataObject['ids'][loadIndex])
+        dioramaModel.addModelDatum(
+          result.scene.children,
+          modelDataObject['ids'][loadIndex],
+          new THREE.Vector3().fromArray(modelDataObject['transforms'][loadIndex])
+        )
         loadIndex += 1
 
         # 最後まで読まれたらresolve
@@ -142,6 +146,13 @@ class DioramaController
     # idはModelData個別
     for t in target
       t.meshData[0].userData['selected'] = !t.meshData[0].userData['selected']
+  
+  # ViewのMeshの位置の変更をModelに反映する
+  # TODO: selectModelとまとめる？
+  updateModel: (id, newPos) ->
+    target = (data for data in dioramaModel.modelData when data.id is id)
+    for t in target
+      t.meshData[0].position = newPos
     
   # 選択されたMeshをSceneとmodelDataから削除する
   deleteModel = () =>

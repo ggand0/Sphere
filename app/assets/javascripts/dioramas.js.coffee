@@ -20,12 +20,13 @@ class ModelData
     generateMesh.call(@)
   
   # 取得したMeshを調整したMeshを生成する
+  # TODO: meshDataの要素個別に位置を反映するようにする
   generateMesh = () ->
     @meshData = []
     for d, index in @data
       newMesh = new THREE.Mesh( d.geometry, d.material)
       newMesh.scale = DEF_SCALE
-      newMesh.position = d.position
+      newMesh.position = @transform#d.position
       newMesh.userData = { selected: false, id: @id, subId: index }
       newMesh.castShadow = true
       @meshData.push(newMesh)
@@ -42,10 +43,10 @@ class Diorama
   constructor: () ->
 
   # modelDataにmodelを追加する
-  addModelDatum: (data, modelId) ->
+  addModelDatum: (data, modelId, pos=new THREE.Vector3(0,0,0)) ->
     #@modelData['id'+id.toString()] = model
     id++
-    @modelData.push( new ModelData(data, id, modelId, new THREE.Vector3(0,0,0)) )
+    @modelData.push( new ModelData(data, id, modelId, pos) )
     return id
   
   getIndices = (meshData, mesh) ->
