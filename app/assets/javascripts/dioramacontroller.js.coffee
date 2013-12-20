@@ -16,7 +16,7 @@ class DioramaController
   # ここではグローバルで与えられたJSONデータをロードし、
   # それらを用いてModelとView(Scene)生成するまでを行う
   constructor: () ->
-    dioramaModel = new Diorama()
+    dioramaModel = new Sphere.Diorama()
 
   # stageのJSONデータをSceneLoaderに投げる
   loadStage = (stageJSON, stageTexturePath) ->
@@ -77,7 +77,7 @@ class DioramaController
       
       # 最後にデータをViewに渡してscene生成
       # createなのでモデル追加関連のイベントを追加する
-      dioramaView = new DioramaView(@, dioramaModel.stageData, true)
+      dioramaView = new Sphere.DioramaView(@, dioramaModel.stageData, true)
       dioramaModel.dioramaView = dioramaView
       
       # 描画開始
@@ -99,7 +99,7 @@ class DioramaController
         
         # 最後にデータをViewに渡してscene生成
         # showなのでモデル操作は禁止する
-        dioramaView = new DioramaView(@, dioramaModel.stageData, false)
+        dioramaView = new Sphere.DioramaView(@, dioramaModel.stageData, false)
         insertModels(modelDataObject)
         
         # 描画開始
@@ -195,4 +195,10 @@ class DioramaController
         dioramaView.addModelToScene(mesh)
       
     
-window.DioramaController = window.DioramaController or DioramaController
+namespace = (target, name, block) ->
+  [target, name, block] = [(if typeof exports isnt 'undefined' then exports else window), arguments...] if arguments.length < 3
+  top    = target
+  target = target[item] or= {} for item in name.split '.'
+  block target, top
+namespace "Sphere", (exports) ->
+  exports.DioramaController = DioramaController

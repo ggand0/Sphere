@@ -61,7 +61,7 @@ class DioramaView
     console.log("Creating scene...")
     
     # FPS表示用のインスタンス生成＆bodyに追加
-    stats = new window.StyledStats('200px', '500px')
+    stats = new Sphere.StyledStats('200px', '500px')
 
     # make cameras
     camera = new THREE.PerspectiveCamera(15, canvasSize.x / canvasSize.y, 10, 100000)
@@ -333,4 +333,11 @@ class DioramaView
   setSceneObjects: (objects) ->
     scene.scene.children = objects
 
-window.DioramaView = window.DioramaView or DioramaView
+
+namespace = (target, name, block) ->
+  [target, name, block] = [(if typeof exports isnt 'undefined' then exports else window), arguments...] if arguments.length < 3
+  top    = target
+  target = target[item] or= {} for item in name.split '.'
+  block target, top
+namespace "Sphere", (exports) ->
+  exports.DioramaView = DioramaView

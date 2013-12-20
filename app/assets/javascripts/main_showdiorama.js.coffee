@@ -34,10 +34,6 @@ $ ->
       console.log(data)
       
       # Dioramaデータを取得
-      ###window.modelDataObj = data['modelData']
-      window.textures = data['textures']
-      window.modelTransforms = data['transforms']
-      window.ids = data['ids']###
       modelData = data
 
       deferred.resolve()
@@ -50,7 +46,7 @@ $ ->
   getStageDatum().then(() ->
     getModelData().then( () ->
       # Stageのデータを取得後にコントローラ生成、内部でシーン生成まで先に行う
-      controller = new window.DioramaController()
+      controller = new Sphere.DioramaController()
       controller.show(stageJSON, stageTexturePath, modelData)
     )
   )

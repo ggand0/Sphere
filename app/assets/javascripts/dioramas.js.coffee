@@ -79,7 +79,7 @@ class Diorama
     console.log("Setting stageData...")
     @stageData = data
   setModelDatum: (data, modelId) ->
-    modelDatum = new window.ModelData(data, 0, modelId, new THREE.Vector3(0,0,0))
+    modelDatum = new Sphere.ModelData(data, 0, modelId, new THREE.Vector3(0,0,0))
   setModelData: (data) ->
     @modelData = data
   
@@ -92,5 +92,11 @@ class Diorama
     return modelDatum
 
 
-window.ModelData = window.ModelData or ModelData
-window.Diorama = window.Diorama or Diorama
+namespace = (target, name, block) ->
+  [target, name, block] = [(if typeof exports isnt 'undefined' then exports else window), arguments...] if arguments.length < 3
+  top    = target
+  target = target[item] or= {} for item in name.split '.'
+  block target, top
+namespace "Sphere", (exports) ->
+  exports.Diorama = Diorama
+  exports.ModelData = ModelData

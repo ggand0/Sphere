@@ -14,8 +14,6 @@ $ ->
       console.log("Begin modeldata request.")
 
       $.getJSON('/model_data/' + e.target.innerText + '.json', (data) ->
-        #window.selectedModelId = data['id']
-        
         # テクスチャのルートパスを取得する
         # URLの最後の"/"以下を取得(404回避)
         urlBase = undefined
@@ -72,7 +70,7 @@ $ ->
   THREE.ImageUtils.crossOrigin = ""
   getStageDatum().then(() ->
     # Stageのデータを取得後にコントローラ生成、内部でシーン生成まで先に行う
-    controller = new window.DioramaController()
+    controller = new Sphere.DioramaController()
     controller.create(stageJSON, stageTexturePath)
     # その後、別途にデフォルトのモデルデータを読み込む
     getModelDatum(controller)
