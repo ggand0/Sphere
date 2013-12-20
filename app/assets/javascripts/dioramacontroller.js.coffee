@@ -17,26 +17,7 @@ class DioramaController
   # それらを用いてModelとView(Scene)生成するまでを行う
   constructor: () ->
     dioramaModel = new Diorama()
-    
-  # new.htmlで呼ぶ
-  create: () ->
-    # jQueryのdeffered queを用いて
-    # RailsからJSONデータを持ってきてロードする
-    console.log("Begin loading stage...")
 
-    # まずStageを読む
-    loadStage().then(() =>
-      console.log("Creating view object...")
-      
-      # 最後にデータをViewに渡してscene生成
-      # createなのでモデル追加関連のイベントを追加する
-      dioramaView = new DioramaView(@, dioramaModel.stageData, true)
-      dioramaModel.dioramaView = dioramaView
-      
-      # 描画開始
-      draw()
-    )
-  
   # stageのJSONデータをSceneLoaderに投げる
   loadStage = () ->
     deferred = new $.Deferred()
@@ -56,16 +37,15 @@ class DioramaController
     loader = new THREE.SceneLoader()
     console.log("length=" + modelDataObj.length)
     
-    # railsで与えられたarray分だけロード[要改善]
+    # Mesh単位でロード
+    # TODO: ModelData単位にするか考える
     for datum, index in modelDataObj
       loader.parse(datum, (result) ->
         console.log("modelData callback function has been called." + loadIndex)
-        loadIndex += 1
-        
         # sceneで返ってくるのでchildrenを取得
-        dioramaModel.addModelDatum(result.scene.children, selectedModelId)
-        #console.log(dioramaModel.getModelData())
-        
+        dioramaModel.addModelDatum(result.scene.children, ids[loadIndex])
+        loadIndex += 1
+
         # 最後まで読まれたらresolve
         if loadIndex >= modelDataObj.length
           deferred.resolve()
@@ -93,8 +73,27 @@ class DioramaController
   draw = () ->
     console.log("Begin rendering...")
     dioramaView.animate()
-    
-  # 以前のコードを置いてるだけ[未実装]
+  
+  # new.htmlで呼ぶ
+  create: () ->
+    # jQueryのdeffered queを用いて
+    # RailsからJSONデータを持ってきてロードする
+    console.log("Begin loading stage...")
+
+    # まずStageを読む
+    loadStage().then(() =>
+      console.log("Creating view object...")
+      
+      # 最後にデータをViewに渡してscene生成
+      # createなのでモデル追加関連のイベントを追加する
+      dioramaView = new DioramaView(@, dioramaModel.stageData, true)
+      dioramaModel.dioramaView = dioramaView
+      
+      # 描画開始
+      draw()
+    )
+  
+  # show.htmlで呼ぶ
   show: () ->
     # jQueryのdeffered queを用いて
     # RailsからJSONデータを持ってきてロードする
@@ -110,7 +109,6 @@ class DioramaController
         # 最後にデータをViewに渡してscene生成
         # showなのでモデル操作は禁止する
         dioramaView = new DioramaView(@, dioramaModel.stageData, false)
-        console.log("Inserting models...")
         insertModels()
         
         # 描画開始
@@ -130,20 +128,18 @@ class DioramaController
     else if event.keyCode is GET_SCENE_KEY          # Gキー
       console.log(dioramaView.getScene())
     else
-      addModel(event)
+      addModel()
   
   
   # MeshをDioramaに追加する
   addModel = (model=dioramaModel.getModelDatum()) =>
     # TODO: ModelData.clone()を実装する
     # 新規にModelDataを生成してModelに追加
-    #tmp = dioramaModel.getModelDatum()
-    #id = dioramaModel.addModelDatum(tmp.data)
-    id = dioramaModel.addModelDatum(model)
+    id = dioramaModel.addModelDatum(model.meshData, selectedModelId)
     
     # 続いてViewに追加
-    model = getModel(id)
-    for mesh in model.meshData
+    m = getModel(id)
+    for mesh in m.meshData
       dioramaView.addModelToScene(mesh.clone())
 
   getModel = (id) ->
@@ -198,14 +194,12 @@ class DioramaController
       
   # 既存のジオラマをshowする時に、modelTransformsで与えられた位置にモデルを配置する
   insertModels = () =>
+    console.log("Inserting models...")
     console.log("positions:")
     console.log(modelTransforms)# rails側から指定するグローバル変数
     
     # ModelにあるmodelDataをViewへ渡す
-    data = dioramaModel.getModelData()
-    console.log("modelData:")
-    console.log(data)
-    for model in data
+    for model in dioramaModel.getModelData()
       for mesh in model.meshData
         dioramaView.addModelToScene(mesh)
       

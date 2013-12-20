@@ -23,7 +23,7 @@ $ ->
     )
     return deferred.promise()
     
-  window.modelDataObj = []
+    
   # サーバーから(デフォルトで選択される)ModelDataを取得する
   getModelData = (controller) ->
     deferred = new $.Deferred()
@@ -33,20 +33,18 @@ $ ->
       console.log(data)
       
       # モデルデータを取得
-      #window.selectedModel = data['modelData']
       window.modelDataObj = data['modelData']
       window.textures = data['textures']
       window.modelTransforms = data['transforms']
-      #window.ids = data['ids']
-      window.selectedModelId = DEF_MODELDATA_ID
+      window.ids = data['ids']
       
       # テクスチャのルートパスを取得
+      # URLの最後の"/"以下を取得(404回避)
       urlBase = undefined
       if data['texturePath']
         url = data['texturePath']?.replace(/[^/]+$/g, "")
-        window.modelTexturePath = url ? '' # URLの最後の"/"以下を取得(404回避)
-      
-      #controller.reloadModelDatum(selectedModel, modelTexturePath)
+        window.modelTexturePath = url ? ''
+
       deferred.resolve()
     )
     return deferred.promise()

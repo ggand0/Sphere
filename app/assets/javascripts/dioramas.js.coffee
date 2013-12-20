@@ -42,10 +42,10 @@ class Diorama
   constructor: () ->
 
   # modelDataにmodelを追加する
-  addModelDatum: (data) ->
+  addModelDatum: (data, model_id) ->
     #@modelData['id'+id.toString()] = model
     id++
-    @modelData.push( new ModelData(data, id, selectedModelId, new THREE.Vector3(0,0,0)) )
+    @modelData.push( new ModelData(data, id, model_id, new THREE.Vector3(0,0,0)) )
     return id
   
   getIndices = (meshData, mesh) ->

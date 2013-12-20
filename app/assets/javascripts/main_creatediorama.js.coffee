@@ -74,9 +74,8 @@ $ ->
     return deferred.promise()
     
   
-  THREE.ImageUtils.crossOrigin = ""
-  
   # ロード開始
+  THREE.ImageUtils.crossOrigin = ""
   getStageDatum().then(() ->
     # Stageのデータを取得後にコントローラ生成、内部でシーン生成まで先に行う
     controller = new window.DioramaController()

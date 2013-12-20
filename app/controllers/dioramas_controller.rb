@@ -134,11 +134,12 @@ class DioramasController < ApplicationController
   def get_diorama
     diorama = Diorama.find(params[:id])
     jsonString = {
-      modelData: diorama.model_datum.map{ |m| ActiveSupport::JSON.decode(m.modeldata) },
-      textures: diorama.model_datum.map{ |m| m.textures[0].data.url or "" },
+      modelData: diorama.model_datum.map { |m| ActiveSupport::JSON.decode(m.modeldata) },
+      textures: diorama.model_datum.map { |m| m.textures[0].data.url or "" },
       transforms: diorama.model_transforms.map {
         |t| ActiveSupport::JSON.decode(t.transform) unless t.transform.nil?
-      }
+      },
+      ids: diorama.model_datum.map { |m| m.id }
     }
     render json: jsonString
   end
