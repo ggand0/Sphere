@@ -8,13 +8,13 @@ $ ->
   $renderer = $(renderer.domElement)
   $('body').append($renderer)
   
+  modelJSON = undefined
+  urlBase = undefined
   mesh = new THREE.Mesh()  # createSceneに参照渡ししたいのでオブジェクトを入れておく
   scene = undefined
   stats = undefined
   controls = undefined
   isMouseDown = false
-  fov = 70
-  urlBase = undefined
   
   
   getModelDatum = () ->
@@ -31,7 +31,7 @@ $ ->
       console.log(data)
       
       # モデルデータを取得
-      window.modelJSON = data['modelData']
+      modelJSON = data['modelData']
  
       # テクスチャのルートパスを取得
       if data['texturePath']
@@ -59,7 +59,7 @@ $ ->
     console.log(scene)
 
     # set stats
-    stats = new window.StyledStats('0px', '500px')
+    stats = new Sphere.StyledStats('0px', '500px')
 
     # make cameras
     camera = new THREE.PerspectiveCamera(15, canvasSize.x / canvasSize.y, 0.01, 100000)
