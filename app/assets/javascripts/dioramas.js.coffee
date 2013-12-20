@@ -42,10 +42,10 @@ class Diorama
   constructor: () ->
 
   # modelDataにmodelを追加する
-  addModelDatum: (data, model_id) ->
+  addModelDatum: (data, modelId) ->
     #@modelData['id'+id.toString()] = model
     id++
-    @modelData.push( new ModelData(data, id, model_id, new THREE.Vector3(0,0,0)) )
+    @modelData.push( new ModelData(data, id, modelId, new THREE.Vector3(0,0,0)) )
     return id
   
   getIndices = (meshData, mesh) ->
@@ -78,8 +78,8 @@ class Diorama
   setStageData: (data) ->
     console.log("Setting stageData...")
     @stageData = data
-  setModelDatum: (data, id) ->
-    modelDatum = new window.ModelData(data, id, selectedModelId, new THREE.Vector3(0,0,0))
+  setModelDatum: (data, modelId) ->
+    modelDatum = new window.ModelData(data, 0, modelId, new THREE.Vector3(0,0,0))
   setModelData: (data) ->
     @modelData = data
   

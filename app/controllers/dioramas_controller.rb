@@ -127,7 +127,7 @@ class DioramasController < ApplicationController
   def get_stage
     @stage = Stage.find(params[:id])
     path = @stage.textures[0].data.url or ""
-    jsonString = { modelData: ActiveSupport::JSON.decode(@stage.scene_data), texturePath: path }
+    jsonString = { stageData: ActiveSupport::JSON.decode(@stage.scene_data), texturePath: path }
     render json: jsonString
   end
   

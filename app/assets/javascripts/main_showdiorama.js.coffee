@@ -1,6 +1,9 @@
 $ ->
   DEF_MODELDATA_ID = 103
   DEF_STAGE_ID = 6
+  stageJSON = undefined
+  stageTexturePath = undefined
+  modelData = undefined
   
   # サーバーからStageを取得する
   getStageDatum = () ->
@@ -8,17 +11,15 @@ $ ->
     $.get('get_stage', { id: DEF_STAGE_ID }
     ).then( (data) ->
       console.log("request of stagedata succeed.")
-      console.log(data)
       
-      # モデルデータを取得
-      window.modelJSON = data['modelData']
-      console.log(window.modelJSON)
+      # Stageデータを取得
+      stageJSON = data['stageData']
  
       # テクスチャのルートパスを取得
       # URLの最後の"/"以下を取得(404回避)
       if data['texturePath']
         url = data['texturePath']?.replace(/[^/]+$/g, "")
-        window.texturePath = url ? ''
+        stageTexturePath = url ? ''
       deferred.resolve()
     )
     return deferred.promise()
@@ -32,18 +33,12 @@ $ ->
       console.log("request of modeldata succeed.")
       console.log(data)
       
-      # モデルデータを取得
-      window.modelDataObj = data['modelData']
+      # Dioramaデータを取得
+      ###window.modelDataObj = data['modelData']
       window.textures = data['textures']
       window.modelTransforms = data['transforms']
-      window.ids = data['ids']
-      
-      # テクスチャのルートパスを取得
-      # URLの最後の"/"以下を取得(404回避)
-      urlBase = undefined
-      if data['texturePath']
-        url = data['texturePath']?.replace(/[^/]+$/g, "")
-        window.modelTexturePath = url ? ''
+      window.ids = data['ids']###
+      modelData = data
 
       deferred.resolve()
     )
@@ -56,7 +51,7 @@ $ ->
     getModelData().then( () ->
       # Stageのデータを取得後にコントローラ生成、内部でシーン生成まで先に行う
       controller = new window.DioramaController()
-      controller.show()
+      controller.show(stageJSON, stageTexturePath, modelData)
     )
   )
   
