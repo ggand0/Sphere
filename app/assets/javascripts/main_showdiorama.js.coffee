@@ -1,4 +1,7 @@
 $ ->
+  DEF_MODELDATA_ID = 103
+  DEF_STAGE_ID = 6
+  
   # サーバーからStageを取得する
   getStageDatum = () ->
     deferred = new $.Deferred()
@@ -6,6 +9,7 @@ $ ->
     ).then( (data) ->
       console.log("request of stagedata succeed.")
       console.log(data)
+      
       # モデルデータを取得
       window.modelJSON = data['modelData']
       console.log(window.modelJSON)
@@ -19,15 +23,21 @@ $ ->
     )
     return deferred.promise()
     
+  window.modelDataObj = []
   # サーバーから(デフォルトで選択される)ModelDataを取得する
-  getModelDatum = (controller) ->
+  getModelData = (controller) ->
     deferred = new $.Deferred()
-    $.get('get_model_datum', { id: DEF_MODELDATA_ID }
+    $.get('get_diorama', { id: $('#id').text() }
     ).then( (data) ->
       console.log("request of modeldata succeed.")
       console.log(data)
+      
       # モデルデータを取得
-      window.selectedModel = data['modelData']
+      #window.selectedModel = data['modelData']
+      window.modelDataObj = data['modelData']
+      window.textures = data['textures']
+      window.modelTransforms = data['transforms']
+      #window.ids = data['ids']
       window.selectedModelId = DEF_MODELDATA_ID
       
       # テクスチャのルートパスを取得
@@ -35,27 +45,20 @@ $ ->
       if data['texturePath']
         url = data['texturePath']?.replace(/[^/]+$/g, "")
         window.modelTexturePath = url ? '' # URLの最後の"/"以下を取得(404回避)
-      console.log(modelTexturePath)
       
-      controller.reloadModelDatum(selectedModel, modelTexturePath)
+      #controller.reloadModelDatum(selectedModel, modelTexturePath)
       deferred.resolve()
     )
     return deferred.promise()
   
   
-  THREE.ImageUtils.crossOrigin = ""
-  
-  window.modelDataObj = []
-  formatModelData = () ->
-    for str in window.modelData
-      str = JSON.parse(str)
-      modelDataObj.push(str)
-
   # ロード開始
-  formatModelData()
+  THREE.ImageUtils.crossOrigin = ""
   getStageDatum().then(() ->
-    # Stageのデータを取得後にコントローラ生成、内部でシーン生成まで先に行う
-    controller = new window.DioramaController()
-    controller.show()
+    getModelData().then( () ->
+      # Stageのデータを取得後にコントローラ生成、内部でシーン生成まで先に行う
+      controller = new window.DioramaController()
+      controller.show()
+    )
   )
   

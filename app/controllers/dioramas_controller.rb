@@ -74,15 +74,14 @@ class DioramasController < ApplicationController
 
     # ModelTransforms追加
     tmp = params[:diorama][:model_transforms_attributes]['0']['transform']
-    posArray = ActiveSupport::JSON.decode(tmp)
+    objects = ActiveSupport::JSON.decode(tmp)
     
-    posArray.each do |position|
+    objects.each do |obj|
       # convert array to string
-      @transform = ModelTransform.new(transform: position['pos'].to_s)
+      @transform = ModelTransform.new(transform: obj['pos'].to_s, model_datum: ModelDatum.find(obj['id']))
       @diorama.model_transforms << @transform
-      @diorama.model_datum << ModelDatum.find(position['id'])
     end
-
+    
     respond_to do |format|
       if @diorama.save!
         format.html { redirect_to @diorama, notice: 'Diorama was successfully created.' }
@@ -124,10 +123,23 @@ class DioramasController < ApplicationController
     jsonString = { modelData: ActiveSupport::JSON.decode(@model_datum.modeldata), texturePath: path }
     render json: jsonString
   end
+  
   def get_stage
     @stage = Stage.find(params[:id])
     path = @stage.textures[0].data.url or ""
     jsonString = { modelData: ActiveSupport::JSON.decode(@stage.scene_data), texturePath: path }
+    render json: jsonString
+  end
+  
+  def get_diorama
+    diorama = Diorama.find(params[:id])
+    jsonString = {
+      modelData: diorama.model_datum.map{ |m| ActiveSupport::JSON.decode(m.modeldata) },
+      textures: diorama.model_datum.map{ |m| m.textures[0].data.url or "" },
+      transforms: diorama.model_transforms.map {
+        |t| ActiveSupport::JSON.decode(t.transform) unless t.transform.nil?
+      }
+    }
     render json: jsonString
   end
 

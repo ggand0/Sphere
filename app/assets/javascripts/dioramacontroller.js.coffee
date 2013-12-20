@@ -63,8 +63,8 @@ class DioramaController
         loadIndex += 1
         
         # sceneで返ってくるのでchildrenを取得
-        dioramaModel.addModelDatum(result.scene.children[0], selectedModelId)
-        console.log(dioramaModel.getModelData())
+        dioramaModel.addModelDatum(result.scene.children, selectedModelId)
+        #console.log(dioramaModel.getModelData())
         
         # 最後まで読まれたらresolve
         if loadIndex >= modelDataObj.length
@@ -103,7 +103,7 @@ class DioramaController
     # まずStageを読む
     loadStage().then(()->
       # 次に個々のモデルを読む
-      console.log("Begin loading modelDatum...")
+      console.log("Begin loading modelData...")
       loadModelData().then(() =>
         console.log("Creating view object...")
         
@@ -134,11 +134,12 @@ class DioramaController
   
   
   # MeshをDioramaに追加する
-  addModel = () =>
+  addModel = (model=dioramaModel.getModelDatum()) =>
     # TODO: ModelData.clone()を実装する
     # 新規にModelDataを生成してModelに追加
-    tmp = dioramaModel.getModelDatum()
-    id = dioramaModel.addModelDatum(tmp.data)
+    #tmp = dioramaModel.getModelDatum()
+    #id = dioramaModel.addModelDatum(tmp.data)
+    id = dioramaModel.addModelDatum(model)
     
     # 続いてViewに追加
     model = getModel(id)
@@ -200,21 +201,13 @@ class DioramaController
     console.log("positions:")
     console.log(modelTransforms)# rails側から指定するグローバル変数
     
-    # Convert JSON to array
-    positions = []
-    $.each(modelTransforms, (i, obj) ->
-      positions.push(JSON.parse(obj))
-    )
-    console.log(positions)
+    # ModelにあるmodelDataをViewへ渡す
     data = dioramaModel.getModelData()
-    
-    # modelTransformsで与えられる位置に配置する 
-    for value, index in positions
-      newMesh = new THREE.Mesh( data[index].geometry,
-        data[index].material)
-      newMesh.scale = new THREE.Vector3(10,10,10)
-      newMesh.position = new THREE.Vector3().fromArray(value)
-      dioramaView.addModelToScene(newMesh)
+    console.log("modelData:")
+    console.log(data)
+    for model in data
+      for mesh in model.meshData
+        dioramaView.addModelToScene(mesh)
       
     
 window.DioramaController = window.DioramaController or DioramaController

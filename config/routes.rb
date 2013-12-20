@@ -17,6 +17,7 @@ Model::Application.routes.draw do
       post 'set_model'
       get 'get_model_datum'
       get 'get_stage'
+      get 'get_diorama'
     end
   end
 
