@@ -17,7 +17,6 @@ class DioramaView
   selectedModelMesh = undefined
   selectedModelLoaded = false
   isMouseDown = false
-  fov = 70
   $debugText = undefined
   
   # カメラ関係
@@ -51,7 +50,6 @@ class DioramaView
     dioramaController = controller
     scene = stageData
     scene.scene = new THREE.Scene()
-
     createScene()
     addEvents(enableControl)
     
@@ -65,13 +63,8 @@ class DioramaView
 
     # make cameras
     camera = new THREE.PerspectiveCamera(15, canvasSize.x / canvasSize.y, 10, 100000)
-    lookAtPos = new THREE.Vector3(camera.position.x + 1000,
-      camera.position.y + 1000, 50)
-    
-    # ToDo:ここの計算式を整理する
-    camera.position.x = radius * Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
-    camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
-    camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
+    lookAtPos = new THREE.Vector3(camera.position.x + 1000, camera.position.y + 1000, 50)
+    camera.position = calculateCameraPos(theta, phi, radius)
     ray = new THREE.Ray(camera.position, null)
     scene.camera = camera
 
@@ -91,7 +84,7 @@ class DioramaView
     
     # generate grid plane
     geometry = new THREE.Geometry();
-    geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( - 500, 0, 0 ) ) )
+    geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( -500, 0, 0 ) ) )
     geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 500, 0, 0 ) ) )
     linesMaterial = new THREE.LineBasicMaterial( 0x000000, 0.2 )
 
@@ -104,7 +97,7 @@ class DioramaView
       line.position.x = ( i * 50 ) - 500
       line.rotation.y = 90 * Math.PI / 180
       scene.scene.add( line )
-    plane = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshBasicMaterial({color: 0xcccccc}));
+    plane = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshBasicMaterial({ color: 0xcccccc }));
     plane.rotation.x = -90 * Math.PI / 180# 回転
     plane.receiveShadow = true;
     scene.scene.add( plane )

@@ -9,7 +9,6 @@ class DioramaController
   dioramaModel = undefined  # データを格納するだけの機能を持つモデル
   dioramaView = undefined   # Scene生成やイベント周りを担当するビューオブジェクト
   loaded = false
-  loadIndex = 0
   
   
 
@@ -30,29 +29,37 @@ class DioramaController
     , stageTexturePath)
     return deferred.promise()
 
-  # showする時にmodelDataを読み込みarrayにセットする
-  loadModelData = (modelDataObject) ->
+  # Meshを１つロードする。loadModelData内で呼ぶ。
+  # transformを反映してModelに追加
+  loadModelDatum = (modelDataObject, index) ->
     deferred = new $.Deferred()
     loader = new THREE.SceneLoader()
-    
-    # Mesh単位でロード
-    # TODO: ModelData単位にするか考える
-    for datum, index in modelDataObject['modelData']
-      loader.parse(datum, (result) ->
-        console.log("modelData callback function has been called." + loadIndex)
-        # sceneで返ってくるのでchildrenを取得
-        dioramaModel.addModelDatum(
-          result.scene.children,
-          modelDataObject['ids'][loadIndex],
-          new THREE.Vector3().fromArray(modelDataObject['transforms'][loadIndex])
-        )
-        loadIndex += 1
+    loader.parse(modelDataObject['modelData'][index], (result) ->
+      console.log("modelData callback function has been called." + index)
+      # sceneで返ってくるのでchildrenを取得
+      dioramaModel.addModelDatum(
+        result.scene.children,
+        modelDataObject['ids'][index],
+        new THREE.Vector3().fromArray(modelDataObject['transforms'][index])
+      )
+      deferred.resolve()
+    , modelDataObject['textures'][index])
+    return deferred.promise()
 
-        # 最後まで読まれたらresolve
-        if loadIndex >= modelDataObject['modelData'].length
-          deferred.resolve()
-          console.log("loadModelData method has resolved.")
-      , modelDataObject['textures'][index])
+  # ジオラマ内の全てのMeshをロードする。showする時に呼ぶ。
+  loadModelData = (modelDataObject) ->
+    deferred = new $.Deferred()
+
+    # Mesh単位でロードする。when関数を用いて、全てのMeshをロードし終わるまで待つ
+    # TODO: ModelData単位にするか考える
+    # 参考：https://gist.github.com/sh19910711/4366617
+    loadList = (loadModelDatum(modelDataObject, index) for index in [0..modelDataObject['modelData'].length-1])
+    console.log(loadList)
+    deferredWhen = jQuery.when.apply( null, loadList )
+    deferredWhen.done(() ->
+      console.log("loadModelData method has resolved.")
+      deferred.resolve()
+    )
     return deferred.promise()
 
   # modelDatumをモデルにセットし直す。create時に使用
@@ -71,7 +78,7 @@ class DioramaController
   
   # new.htmlで呼ぶ
   create: (stageJSON, stageTexturePath) ->
-    # jQueryのdeffered queを用いて
+    # jQueryのdeffered queueを用いて
     # RailsからJSONデータを持ってきてロードする
     console.log("Begin loading stage...")
 
@@ -90,7 +97,7 @@ class DioramaController
   
   # show.htmlで呼ぶ
   show: (stageJSON, stageTexturePath, modelDataObject) ->
-    # jQueryのdeffered queを用いて
+    # jQueryのdeffered queueを用いて
     # RailsからJSONデータを持ってきてロードする
     console.log("Begin loading stage...")
 
@@ -99,6 +106,7 @@ class DioramaController
       # 次に個々のモデルを読む
       console.log("Begin loading modelData...")
       loadModelData(modelDataObject).then(() =>
+      #asyncLoop(modelDataObject, 0).then(() =>
         console.log("Creating view object...")
         
         # 最後にデータをViewに渡してscene生成
