@@ -13,7 +13,7 @@ $ ->
     $test.children(".item").click((e) ->
       console.log("Begin modeldata request.")
 
-      $.getJSON('/model_data/' + e.target.innerText + '.json', (data) ->
+      $.getJSON('/model_data/' + $(@).text() + '.json', (data) ->
         # テクスチャのルートパスを取得する
         # URLの最後の"/"以下を取得(404回避)
         urlBase = undefined
