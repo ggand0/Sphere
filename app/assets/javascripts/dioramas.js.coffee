@@ -5,119 +5,99 @@
 
 # JSONDataなど１つのモデルに関するデータを格納するクラス。構造体的に使う
 class ModelData
-  data: undefined       # JSONで記述されたモデルデータ　の配列
-  #subData: undefined    # tmp
-  id: undefined         # DB上のID
-  transform: undefined  # 位置ベクトル
-  # Object3D.userData(つまｔりdata.userData)を使うことにする
-  #selected: false       # ユーザによって選択されているかどうか
-  meshData: undefined    # Three.Mesh　の配列
-  dioramaView:undefined
+  DEF_SCALE = new THREE.Vector3(10,10,10)
+  data: undefined         # parseされたTHREE.Mesh(オリジナル)の配列
+  id: undefined           # 識別ID(Diorama.modelDataへ追加時に設定される)
+  modelId: undefined      # ModelDataのDB上のID
+  transform: undefined    # 位置ベクトル
+  meshData: undefined     # シーンとやりとりするのに使う（リアルタイムな位置情報を持ってる）Three.Meshの配列
   
-  constructor: (data, id, transform) ->
+  constructor: (data, id, modelId, transform) ->
     @data = data
     @id = id
+    @modelId = modelId
     @transform = transform
-    generateMesh.call(this)
+    generateMesh.call(@)
   
-  # 取得したデータからMesh生成
+  # 取得したMeshを調整したMeshを生成する
+  # TODO: meshDataの要素個別に位置を反映するようにする
   generateMesh = () ->
     @meshData = []
-    for d in @data
-      #toonMaterial = new THREE.ShaderMaterial(THREE.Toon['toon0'])
-      ###toonMaterials = []
-      console.log(d)
-      if d instanceof THREE.Mesh
-        for mat in d.material.materials
-          toonMaterial = new THREE.ShaderMaterial({
-            fragmentShader: document.getElementById('fs').innerHTML,
-            vertexShader  : document.getElementById('vs').innerHTML,
-            attributes: {
-              color: {
-                type: 'v4',
-                value: new THREE.Vector4(0, 0, 0, 0)
-              }
-            },
-            uniforms: {
-              edgeColor: {
-                type: 'v4',
-                value: new THREE.Vector4(0, 0, 0, 0)
-              },
-              edge: {
-                type: 'i',
-                value: true
-              },
-              lightDirection: {
-                type: 'v3',
-                #value: dioramaView.scene.lights[0].position
-                value: new THREE.Vector3(0, 100, 100)
-              },
-              texture: {
-                type: 't',
-                #value: THREE.ImageUtils.loadTexture('textures/toon.png')
-                value: mat.map
-              },
-              
-            }
-          })
-          toonMaterials.push(toonMaterial)
-      ###
-      #newMesh = new THREE.Mesh( d.geometry, new THREE.MeshFaceMaterial(toonMaterials))#d.material
-      newMesh = new THREE.Mesh( d.geometry, d.material)       
-      newMesh.scale = new THREE.Vector3(10, 10, 10)
-      newMesh.position = new THREE.Vector3(Math.random() * 100, Math.random() * 100, Math.random() * 100)
-      newMesh.userData = { selected: false }
+    for d, index in @data
+      newMesh = new THREE.Mesh( d.geometry, d.material)
+      newMesh.scale = DEF_SCALE
+      newMesh.position = @transform#d.position
+      newMesh.userData = { selected: false, id: @id, subId: index }
+      newMesh.castShadow = true
       @meshData.push(newMesh)
 
 
-# ジオラマが持つJSONDataの集合
+# Stageと、ユーザーに追加されたModelDataのMeshをまとめるジオラマクラス。
 class Diorama
   # プロパティでもいいかも
-  stageData: undefined    # Stageを格納する変数
-  modelDatum = undefined  # 単一のモデルデータ用の変数
-  modelData = []          # ModelDataのリスト
+  stageData: undefined      # Stageを格納する変数
+  modelDatum = undefined    # 現在追加しようとしている（単一の）モデル
+  modelData: []             # 現在ジオラマ上に存在しているModelDataのArray
+  id = -1                   # 追加されたModelDataのID
 
   constructor: () ->
 
-  addModelDatum: (model) ->
-    modelData.push(model)
-  #selectModelDatum: (selectedModel) ->
-  removeModels: (targets) ->
-    console.log("Removing targets from modelData...")
-    #dels = (obj for obj in modelData.data when obj is t for t in targets)
-    dels = (obj for obj in modelData when obj.meshData is t for t in targets)
-    console.log(dels)
-    indices = (modelData.indexOf(d[0]) for d in dels)
-    console.log(indices)
+  # modelDataにmodelを追加する
+  addModelDatum: (data, modelId, pos=new THREE.Vector3(0,0,0)) ->
+    #@modelData['id'+id.toString()] = model
+    id++
+    @modelData.push( new ModelData(data, id, modelId, pos) )
+    return id
+  
+  getIndices = (meshData, mesh) ->
+    return { dataId: @modelData.indexOf(meshData), meshId: meshData.indexOf(mesh) }
+  
+  # TODO: Mesh単位の削除に対応する
+  selected = (data) ->
+    for mesh in data.meshData
+      if mesh.userData['selected']
+        return true
+    return false
+  
+  # @modelDataから対象を削除する
+  # targets:削除対象ModelDataのリスト
+  # TODO: Mesh単位の削除に対応する
+  # TODO: Controllerに処理を移す
+  deleteModels: () ->
+    console.log("Removing targets from @modelData...")
+    #dels = (getIndices(meshData, mesh) for mesh in data.meshData for data in @modelData when mesh.userData.selected)
     
-    console.log("Current modelData:")
-    console.log(modelData)
-    for i in indices
-      modelData.splice(i[0], 1)
-      
-    console.log("Deletion is completed!")
-    console.log(modelData)
-    #for d in dels
-    # modelData.remove(d[0])
-    
-    
-  　# setter
+    # 選択されていないdataだけ残したmodelDataを新たに設定する
+    newModelData = @modelData.filter(
+      (data) ->
+        return !selected(data)
+    )
+    @setModelData(newModelData)
+
+  
+  　# Setter
   setStageData: (data) ->
     console.log("Setting stageData...")
     @stageData = data
-  setModelDatum: (data, subData, id) ->
-    modelDatum = new window.ModelData(data, subData, id)
+  setModelDatum: (data, modelId) ->
+    modelDatum = new Sphere.ModelData(data, 0, modelId, new THREE.Vector3(0,0,0))
   setModelData: (data) ->
-    modelData = data
+    @modelData = data
   
-  # getter
+  # Getter
   getStageData: () ->
     return stageData
   getModelData: () ->
-    return modelData
+    return @modelData
   getModelDatum: () ->
     return modelDatum
 
 
-window.ModelData = window.ModelData or ModelData
-window.Diorama = window.Diorama or Diorama
+namespace = (target, name, block) ->
+  [target, name, block] = [(if typeof exports isnt 'undefined' then exports else window), arguments...] if arguments.length < 3
+  top    = target
+  target = target[item] or= {} for item in name.split '.'
+  block target, top
+namespace "Sphere", (exports) ->
+  exports.Diorama = Diorama
+  exports.ModelData = ModelData

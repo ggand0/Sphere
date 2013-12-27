@@ -1,7 +1,8 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  modeldata: MyString
+  modeldata: "{\"users\": [{\"user_id\": 1,\"name\": \"Chris Rivers\"},{\"user_id\": 3,\"name\": \"Peter Curley\"}]}"
+  ##{"modeldata":"{\n\"metadata\":{\n"formatVersion\":3.2,\n"type\":\"scene\"\n}\n}\n}
 
 two:
   modeldata: MyString

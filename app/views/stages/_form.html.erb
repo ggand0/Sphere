@@ -20,7 +20,7 @@
     <p>file</p>
     <%= f.file_field :file %>
   </div>
-  <div class="textureFiles">
+  <div class="field">
 	<%= f.fields_for :texture do |t| %>
 		<%= t.file_field :data %>
 	<% end %>

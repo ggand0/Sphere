@@ -1,49 +1,9 @@
-<style>
-#site-box {  width: 1200px;  }
-#left-box {
-  width: 600px;
-  float:left;
-  margin-right:70px;
-}
-#right-box {
-  float:right;
-}
-</style>
-<div id = "site-box">
 <p id="notice"><%= notice %></p>
+
 <p><strong>Stagedata:</strong></p>
+<div id="id"><%= @stage.id %></div>
 
-<div id = "left-box">
-	<p><%= @stage.title %></p>
-	
-	<%= javascript_tag do %>
-		window.model_json = <%= raw @stage.scene_data %>
-		
-		<!-- If modeldata has at least one texture, set the path -->
-		<% if !@stage.textures.empty? %>
-			window.texture_path = "<%= @textures.data.url %>";
-		<% else %>
-  			window.texture_path = "";
-		<% end %>
-	<% end %>
+<%= javascript_include_tag "stats.min", "TrackballControls", "styledstats", "show_model" %>
 
-	<%= javascript_include_tag "three", "stats.min", "show_scene", "OrbitControls" %>
-	<br>
-	<%= link_to 'Edit', edit_stage_path(@stage) %> |
+<%= link_to 'Edit', edit_stage_path(@stage) %> |
 <%= link_to 'Back', stages_path %>
-	
-</div>
-<div id = "left-box">
-	<!-- Put texture image for debug -->
-	<% if !@stage.textures.empty? %>
-		This stage has the following textures:<br>
-		<%= image_tag @textures.data.url %>
-	<% else %>
-		This stage does not have any textures.
-	<% end %>
-</div>
-
-</div>
-
-
-

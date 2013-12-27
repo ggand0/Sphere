@@ -10,19 +10,17 @@ class StagesController < ApplicationController
   # GET /stages/1
   # GET /stages/1.json
   def show
-    @textures = @stage.textures[0]
-    unless @stage.textures.empty?
-      p(@stage.textures)
-      p("debug texture url:")
-      p(@textures.data.url)
+    @data = ActiveSupport::JSON.decode(@stage.scene_data)
+    @textures = @stage.textures
+    unless @stage.textures.nil?
+      @urls = @stage.textures.map{ |texture| texture.data.url }
     end
-    p("debug scene_data:")
-    p(@stage)
   end
 
   # GET /stages/new
   def new
     @stage = Stage.new
+    @textures = Texture.new
   end
 
   # GET /stages/1/edit
@@ -33,19 +31,13 @@ class StagesController < ApplicationController
   # POST /stages.json
   def create
     # JSONファイルから文字列を抽出する
-    file = params['stage']['file']# Upされたファイルにアクセス
+    file = params['stage']['file']
     
-    p("file params:")
-
     @jsonstring = file.read
-    p(@jsonstring)
-    @stage = Stage.new(:scene_data => @jsonstring, :title => params[:stage][:title])
-    p("stage.scene_data:")
-    p(@stage.scene_data)
-    #p(@stage.nothing)
-    
-    if params[:stage][:texture] != nil
-      @textures = Texture.new(:data => params[:stage][:texture]['data'])
+    @stage = Stage.new(scene_data: @jsonstring, title: params[:stage][:title])
+
+    unless params[:stage][:texture].nil?
+      @textures = Texture.new(data: params[:stage][:texture]['data'])
       @stage.textures << @textures
     end
 
@@ -82,6 +74,16 @@ class StagesController < ApplicationController
       format.html { redirect_to stages_url }
       format.json { head :no_content }
     end
+  end
+  
+  def get_contents
+    @stage = Stage.find(params[:id])
+      
+    # If modeldata has at least one texture, set the path
+    path = @stage.textures[0].data.url or ""
+    jsonString = { modelData: ActiveSupport::JSON.decode(@stage.scene_data), texturePath: path }
+
+    render json: jsonString
   end
 
   private

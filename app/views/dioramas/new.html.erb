@@ -1,36 +1,21 @@
+<%= stylesheet_link_tag "dioramas" %>
 <h1>New diorama</h1>
 
-<div id = "site-box">
+<div id="siteBox">
 	<%= render 'form' %>
 	<%= link_to 'Back', dioramas_path %>
 </div>
 
-<div id = "left-box">
-	<%= javascript_tag do %>
-		window.modelJSON = <%= raw @selectedStage.scene_data %>
-		window.selectedModel = <%= raw @selectedModel.modeldata %>
-		window.selectedModelId = <%= raw @selectedModel.id %>
-		
-		<% unless @selectedStage.textures.empty? %>
-			window.texturePath = "<%= @selectedStageTextures.data.url %>";
-		<% else %>
-			window.texturePath = "";
-		<% end %>
-		<% unless @selectedModel.textures.empty? %>
-			window.modelTexturePath = "<%= @selectedModelTextures.data.url %>";
-		<% else %>
-			window.modelTexturePath = "";
-		<% end %>
-	<% end %>
-	<%= javascript_include_tag "three", "stats.min", "gl-matrix.js", "styledstats", "dioramas", "toon", "dioramacontroller", "dioramaview", "main_creatediorama", "OrbitControls", "EditorControls", "TrackballControls" %>
-</div>
-<!-- とりあえず表示しているだけ -->
-<div id = "modelSelectionParent">
+<div id="leftBox">
+	<%= javascript_include_tag "stats.min", "gl-matrix.js", "styledstats", "dioramas", "toon", "dioramacontroller", "dioramaview", "main_creatediorama", "EditorControls", "TrackballControls" %>
+</div> 
+
+<div id="modelSelectionParent">
 	<h2>ModelData:</h2>
 	
-	<div id = "modelSelection">
+	<div id="modelSelection">
 		<% @model_data.each do |model_datum| %>
-		  	<div class = "item">
+		  	<div class="item">
 			    <%= model_datum.id %>
 	  		</div>
 		<% end %>

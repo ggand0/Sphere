@@ -14,3 +14,4 @@
 //= require jquery_ujs
 //= require turbolinks
 //= require jquery-fileupload/basic
+//= require threejs/build/three.js

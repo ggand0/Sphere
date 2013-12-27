@@ -6,24 +6,16 @@ class ModelDataController < ApplicationController
   # GET /model_data.json
   def index
     @model_data = ModelDatum.all
-
-=begin
-    #debug
-    defPath = "/var/www/html/RailsTest/model/my_data/"
-    filename = "monkey_notexture.fbx.js"
-    sig = ".js"
-    #value = %x(ls)
-    value = %x(rm #{defPath}#{filename}  2>&1)
-    p("removing files debug")
-    p(value)
-    render :text => value
-=end
   end
 
   # GET /model_data/1
   # GET /model_data/1.json
   def show
+    @data = ActiveSupport::JSON.decode(@model_datum.modeldata)
     @textures = @model_datum.textures
+    unless @model_datum.textures.nil?
+      @urls = @model_datum.textures.map{ |texture| texture.data.url }
+    end
   end
 
   # GET /model_data/new
@@ -38,61 +30,15 @@ class ModelDataController < ApplicationController
   
   # POST /model_data
   # POST /model_data.json
+  # フォームからファイルを受取り、my_dataフォルダ内に一時保存、
+  # JSONファイルにコンバートした後、文字列を抜き出してDBに保存する。
   def create
-    #hoge
-    # フォームからファイルを受取り、my_dataフォルダ内に一時保存、
-    # JSONファイルにコンバートした後、文字列を抜き出してDBに保存する。
-    # ToDo:主要な処理をServiceオブジェクトへ移動する
-    
-    
-    # アップロードされたファイルをmodel/my_dataに一時的に保存する
-    file = params['model_datum']['file']# 指定されたファイルにアクセス
-    defPath = "/var/www/html/RailsTest/model/my_data/"
-    p(defPath + file.original_filename)
-    
-    of = File.open(defPath + file.original_filename, 'w')
-    #of.write(file.read.force_encoding("ascii-8bit"))
-    of.write(file.read.force_encoding("UTF-8"))
-    #of.write(file.read)
-    of.close
-    
-    # JSON形式に変換
-    p("json export result : ")
-    #value = %x(python2.6 my_data/convert_to_threejs.py my_data/#{file.original_filename} my_data/#{file.original_filename}.js 2>&1)
-    # テクスチャurlにmy_data/を含めたくないので、ディレクトリ移動後に実行
-    value = %x(cd my_data; python2.6 convert_to_threejs.py #{file.original_filename} #{file.original_filename}.js 2>&1)
-    p(value)
-    
-    # 元ファイル削除
-    p("deleting org file...")
-    value = %x(rm -f #{defPath}#{file.original_filename})
-    p(value)
-    
-    # DBに文字列としてJSONファイルの内容を格納（JSONファイルに変換した後であることをよく確認）
-    #file = open(defPath + params[:model_datum][:fileName])#old
-    jsfile = open(defPath + file.original_filename + ".js")
-    @jsonstring = ""
-    while line = jsfile.gets
-      @jsonstring += line
-    end
-    
-    @model_datum = ModelDatum.new(:modeldata => @jsonstring, :title => params[:model_datum][:title])
-    
-    if params[:model_datum][:texture] != nil
-      #@textures = Texture.new(:data => params[:model_datum][:texture]['data'])
-      #for file in params[:model_datum][:texture][:data]
-      for file in params[:model_datum][:texture][:model_datum][:textures]
-        #textures << texture
-        texture = Texture.new(:data => file)
-        @model_datum.textures << texture
-      end
-      
-      #@model_datum.textures << textures
-    end
-    
+    # コンバート&モデル作成
+    converter = ModelDataService.new()
+    @model_datum = converter.convert_model_datum(params)
+
     # saveしてDBへ保存
     respond_to do |format|
-      #if @model_datum.save && @textures.save
       if @model_datum.save!
         format.html { redirect_to @model_datum, notice: 'Model datum was successfully created.' }
         format.json { render action: 'show', status: :created, location: @model_datum }
@@ -101,11 +47,7 @@ class ModelDataController < ApplicationController
         format.json { render json: @model_datum.errors, status: :unprocessable_entity }
       end
     end
-    
-    # JSON(.js)ファイル削除
-    p("deleting .js file...")
-    value = %x(rm -f #{defPath}#{file.original_filename}.js)
-    p(value)
+
   end
 
   # PATCH/PUT /model_data/1
@@ -132,8 +74,14 @@ class ModelDataController < ApplicationController
     end
   end
   
-  def runPython
+  def get_contents
+    @model_datum = ModelDatum.find(params[:id])
+      
+    # If modeldata has at least one texture, set the path
+    path = @model_datum.textures[0].data.url or ""
+    jsonString = { modelData: ActiveSupport::JSON.decode(@model_datum.modeldata), texturePath: path }
 
+    render json: jsonString
   end
 
   private
@@ -144,9 +92,7 @@ class ModelDataController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def model_datum_params
-      #params.permit(:model_datum)
       params.require(:model_datum).permit(:modeldata, :texture, :textures)
-      #params.require(:model_datum).permit(:modeldata, :model_datum_id)
     end
     
     def textures_params

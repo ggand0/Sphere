@@ -6,7 +6,7 @@ class DioramaView
   renderer.setClearColorHex(0xffffff, 1)
   renderer.shadowMapEnabled = true;
   
-  $container = $("#left-box")
+  $container = $("#leftBox")
   $renderer = $(renderer.domElement)
   $container.append($renderer)
 
@@ -17,7 +17,6 @@ class DioramaView
   selectedModelMesh = undefined
   selectedModelLoaded = false
   isMouseDown = false
-  fov = 70
   $debugText = undefined
   
   # カメラ関係
@@ -30,15 +29,15 @@ class DioramaView
   radius = 1000
   theta = 45
   phi = 60
-  enableControl = true          # モデルが選択されている時はカメラ操作をオフにする。そのためのフラグ
+  enableControl = true              # モデルが選択されている時はカメラ操作をオフにする。そのためのフラグ
   
   # Mouse picking関係
   mouseX = undefined
   mouseY = undefined
   modelObjects = new Array()
-  isSelected = undefined        # マウスで選択されたオブジェクトを格納する
-  isIntersected = undefined
-  plane = undefined             # マウスでオブジェクトを移動する際に使用する平面オブジェクト。不可視
+  selectedObject = undefined        # マウスで選択されたオブジェクトを格納する
+  intersectedObject = undefined
+  plane = undefined                 # マウスでオブジェクトを移動する際に使用する平面オブジェクト。不可視
   offset = new THREE.Vector3()
   
   # コントローラへの参照
@@ -49,53 +48,32 @@ class DioramaView
   # stageオブジェクトを受け取ってsceneを生成する
   constructor: (controller, stageData, enableControl) ->
     dioramaController = controller
-    #scene = this.controller.get()
     scene = stageData
-    console.log("dioramaView's scene:")
-    console.log(controller)
-    console.log(dioramaController)
-    console.log(stageData)
-    console.log(scene)
-    
+    scene.scene = new THREE.Scene()
     createScene()
-    addEvents.call(this, enableControl)
+    addEvents(enableControl)
     
 
   # 既に設定されたsceneにいろいろ追加する、シーン生成関数
   createScene = () ->
     console.log("Creating scene...")
-    # tmp
-    for obj in scene.scene.children
-      scene.scene.remove(obj)
-    #scene.objects.remove(scene.objects[0])
-    delete scene.objects.Object_3
-    console.log(typeof scene.objects)
-    #scene.objects.splice(0, 1)
-    console.log(scene)
     
     # FPS表示用のインスタンス生成＆bodyに追加
-    stats = new window.StyledStats()
+    stats = new Sphere.StyledStats('200px', '500px')
 
     # make cameras
     camera = new THREE.PerspectiveCamera(15, canvasSize.x / canvasSize.y, 10, 100000)
-    lookAtPos = new THREE.Vector3(camera.position.x + 1000,
-      camera.position.y + 1000, 50)
-    
-    # ToDo:ここの計算式を整理する
-    camera.position.x = radius * Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
-    camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
-    camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
+    lookAtPos = new THREE.Vector3(camera.position.x + 1000, camera.position.y + 1000, 50)
+    camera.position = calculateCameraPos(theta, phi, radius)
     ray = new THREE.Ray(camera.position, null)
     scene.camera = camera
 
     # make lights
     light = new THREE.DirectionalLight(0xffffff)
-    #light.position = new THREE.Vector3(0.577, 10, 10)
     light.position = new THREE.Vector3(0.577, 10, 50)
     light.castShadow = true;
     light.shadowCameraVisible = true;
     light2 = new THREE.DirectionalLight(0xffffff)
-    #light2.position = new THREE.Vector3(0.577, 100, 10)
     light2.position = new THREE.Vector3(0.577, 100, 100)
     light2.castShadow = true;
     light2.shadowCameraVisible = true;
@@ -106,11 +84,10 @@ class DioramaView
     
     # generate grid plane
     geometry = new THREE.Geometry();
-    geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( - 500, 0, 0 ) ) )
+    geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( -500, 0, 0 ) ) )
     geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 500, 0, 0 ) ) )
     linesMaterial = new THREE.LineBasicMaterial( 0x000000, 0.2 )
-    #linesMaterial = new THREE.LineBasicMaterial( 0xcccccc, 1.0 )
-    #for ( var i = 0; i <= 20; i ++ ) {
+
     for i in [0..20]
       line = new THREE.Line( geometry, linesMaterial )
       line.position.z = ( i * 50 ) - 500
@@ -120,7 +97,7 @@ class DioramaView
       line.position.x = ( i * 50 ) - 500
       line.rotation.y = 90 * Math.PI / 180
       scene.scene.add( line )
-    plane = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshBasicMaterial({color: 0xcccccc}));
+    plane = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshBasicMaterial({ color: 0xcccccc }));
     plane.rotation.x = -90 * Math.PI / 180# 回転
     plane.receiveShadow = true;
     scene.scene.add( plane )
@@ -159,11 +136,19 @@ class DioramaView
     stats.update()
     #controls.update()
     $debugText.text("#{scene.camera.position.x} #{scene.camera.position.y} #{scene.camera.position.z}")
-    #$debugText.text(isIntersected)
+    #$debugText.text(intersectedObject)
     
   
+  calculateCameraPos = (theta, phi, radius) ->
+    angle = new THREE.Vector3(
+      Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 ),
+      Math.sin( phi * Math.PI / 360 ),
+      Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
+    )
+    return angle.multiplyScalar(radius) # 全ての成分をraidus倍して返す
+  
   # カメラ操作関連のイベントを追加する
-  addCameraEvents= () ->
+  addCameraEvents = () ->
     $(document).on "mousedown", (event) ->
       # Camera control
       isMouseDown = true
@@ -194,12 +179,8 @@ class DioramaView
           phi = ( ( event.originalEvent.clientY - onMouseDownPosition.y ) * 0.5 ) +
                 onMouseDownPhi
           phi = Math.min( 180, Math.max( 0, phi ) )
-    
-          scene.camera.position.x = radius * Math.sin( theta * Math.PI / 360 ) *
-                              Math.cos( phi * Math.PI / 360 )
-          scene.camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
-          scene.camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) *
-                              Math.cos( phi * Math.PI / 360 )
+
+          scene.camera.position = calculateCameraPos(theta, phi, radius)
           scene.camera.updateMatrix()
         mouse3D = projector.unprojectVector(
           new THREE.Vector3(
@@ -209,22 +190,18 @@ class DioramaView
           ),
           scene.camera
         )
-        #ray.direction = mouse3D.subSelf( scene.camera.position ).normalize()
         ray.direction = mouse3D.sub( scene.camera.position ).normalize()
-        #render()
         scene.camera.lookAt(new THREE.Vector3(0, 0, 0))
 
     $(document).on "mousewheel", (event) ->
       if enableControl
         radius -= event.originalEvent.wheelDeltaY
-        scene.camera.position.x = radius * Math.sin(theta * Math.PI / 360) * Math.cos(phi * Math.PI / 360)
-        scene.camera.position.y = radius * Math.sin( phi * Math.PI / 360 )
-        scene.camera.position.z = radius * Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 )
+        scene.camera.position = calculateCameraPos(theta, phi, radius)
         scene.camera.updateMatrix()
         
     
   # モデル追加・操作関連のイベントを追加する
-  addModelEvents= () ->
+  addModelEvents = () ->
     $(document).on "mousedown", (event) ->
     #$container.on "mousedown", (event) ->
       # Picking ray detection
@@ -241,40 +218,31 @@ class DioramaView
       raycaster = new THREE.Raycaster( scene.camera.position,
         vector.sub( scene.camera.position ).normalize() )
       intersects = raycaster.intersectObjects(modelObjects)
-  
-      #console.log(vector)
-      #console.log(modelObjects)
-      console.log(intersects)
       
-      # 何かと交差していたら、対象を選択中のオブジェクトとしてisSelectedへ保存する
+      # 何かと交差していたら、対象を選択中のオブジェクトとしてselectedObjectへ保存する
       if intersects.length > 0
         enableControl = false
         #intersects[0].object.material.color.setHex( Math.random() * 0xffffff )
-        isSelected = intersects[0].object
+        selectedObject = intersects[0].object
         
         # 選択フラグを操作
         for obj in scene.scene.children
-          if obj is isSelected
-            if obj.userData['selected'] is true
-              obj.userData = { selected: false }
-            else
-              obj.userData = { selected: true }
+          if obj is selectedObject
+            obj.userData['selected'] = !obj.userData['selected']
+            # Modelに反映する
+            dioramaController.selectModel(obj.userData['id'])
+        console.log(selectedObject)
         
-        
-        console.log(isSelected)
         # from sample
         intersects = raycaster.intersectObject( plane )
         offset.copy( intersects[0].point ).sub( plane.position )
         
             
     $(document).on "mouseup", (event) ->
-      console.log("mouseup")
-      console.log(isIntersected)
-      
       # Mouse picking
-      if isIntersected
-        plane.position.copy( isIntersected.position )
-        isSelected = null
+      if intersectedObject
+        plane.position.copy( intersectedObject.position )
+        selectedObject = null
         console.log("none is selected.")
         
     $(document).on "mousemove", (event) ->
@@ -290,66 +258,52 @@ class DioramaView
       vector = new THREE.Vector3( mouseX, mouseY, 0.5 )
       projector.unprojectVector( vector, scene.camera )
       raycaster = new THREE.Raycaster( scene.camera.position, vector.sub( scene.camera.position ).normalize() )
-      if isSelected
-        console.log(isSelected)
+      if selectedObject
         # planeはカメラ方向を向かせているので絶対交差するはず
         intersects = raycaster.intersectObject( plane )
-        isSelected.position.copy( intersects[0].point.sub( offset ) )
+        selectedObject.position.copy( intersects[0].point.sub( offset ) )
+        dioramaController.updateModel(selectedObject.userData['id'], selectedObject.position)
         return
         
       intersects = raycaster.intersectObjects( modelObjects )
       if intersects.length > 0
-        if isIntersected isnt intersects[0].object
-          #if isIntersected
-            #console.log(isIntersected)
-            #isIntersected.material.color.setHex( isIntersected.currentHex )
-  
-          isIntersected = intersects[0].object
-          #isIntersected.currentHex = isIntersected.material.color.getHex()
-          
-          
+        if intersectedObject isnt intersects[0].object
+          intersectedObject = intersects[0].object
+
           # オブジェクトを動かす基準にする平面を、カメラの方へ向ける（並行に置く）
-          plane.position.copy( isIntersected.position )
+          plane.position.copy( intersectedObject.position )
           plane.lookAt( scene.camera.position )
       else
-        isIntersected = null
-        #container.style.cursor = 'auto'
-    
+        intersectedObject = null
+
     # その他のイベントを追加
     $('body').on('dblclick', dioramaController.insertTransforms)
     $("body").keypress(dioramaController.handleKeyEvents)
-   
-    console.log("SELECTOR TEST ")
-    console.log(renderer.context)
-    console.log($("#left-box"))
-    console.log($('body'))
-      
     
 
   # マウスイベントを追加する
-  addEvents= (addControlEvents) ->
+  addEvents = (addControlEvents) ->
     console.log("Adding events...")
     console.log(dioramaController)
     console.log(dioramaController.addModel)
     
-    addCameraEvents.call(this)
+    addCameraEvents()
     if addControlEvents
-      addModelEvents.call(this)
+      addModelEvents()
         
   
   # シーンにあるオブジェクトのやりとり
   addModelToScene: (newMesh) ->
     scene.scene.add(newMesh)
     modelObjects.push(newMesh)
-  removeModel: (target) ->
+  deleteModel: (target) ->
     for obj in scene.scene.children
       if obj is target
         scene.scene.remove(obj)
-  removeModels: (targets) ->
-    dels = (obj for obj in scene.scene.children when obj is t for t in targets)
-    console.log(dels)
+  deleteModels: () ->
+    dels = (obj for obj in scene.scene.children when obj.userData['selected'])
     for d in dels
-      scene.scene.remove(d[0])
+      scene.scene.remove(d)
       
   getAllSceneObjects: () ->
     return scene.scene.children
@@ -361,4 +315,12 @@ class DioramaView
   setSceneObjects: (objects) ->
     scene.scene.children = objects
 
-window.DioramaView = window.DioramaView or DioramaView
+
+
+namespace = (target, name, block) ->
+  [target, name, block] = [(if typeof exports isnt 'undefined' then exports else window), arguments...] if arguments.length < 3
+  top    = target
+  target = target[item] or= {} for item in name.split '.'
+  block target, top
+namespace "Sphere", (exports) ->
+  exports.DioramaView = DioramaView

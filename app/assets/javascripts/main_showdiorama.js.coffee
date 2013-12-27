@@ -1,24 +1,53 @@
 $ ->
-  THREE.ImageUtils.crossOrigin = ""
+  DEF_MODELDATA_ID = 103
+  DEF_STAGE_ID = 6
+  stageJSON = undefined
+  stageTexturePath = undefined
+  modelData = undefined
   
-  window.modelDataObj = []
-  formatModelData = () ->
-    for str in window.modelData
-      str = JSON.parse(str)
-      modelDataObj.push(str)
+  # サーバーからStageを取得する
+  getStageDatum = () ->
+    deferred = new $.Deferred()
+    $.get('get_stage', { id: DEF_STAGE_ID }
+    ).then( (data) ->
+      console.log("request of stagedata succeed.")
+      
+      # Stageデータを取得
+      stageJSON = data['stageData']
+ 
+      # テクスチャのルートパスを取得
+      # URLの最後の"/"以下を取得(404回避)
+      if data['texturePath']
+        url = data['texturePath']?.replace(/[^/]+$/g, "")
+        stageTexturePath = url ? ''
+      deferred.resolve()
+    )
+    return deferred.promise()
+    
+    
+  # サーバーから(デフォルトで選択される)ModelDataを取得する
+  getModelData = (controller) ->
+    deferred = new $.Deferred()
+    $.get('get_diorama', { id: $('#id').text() }
+    ).then( (data) ->
+      console.log("request of modeldata succeed.")
+      console.log(data)
+      
+      # Dioramaデータを取得
+      modelData = data
 
+      deferred.resolve()
+    )
+    return deferred.promise()
+  
+  
   # ロード開始
-  formatModelData()
-  #console.log(modelData)
-  
-  console.log("modelData:")
-  console.log(window.modelData)
-  console.log(window.modelDataObj)
-  console.log("textures url:")
-  console.log(window.textures)
-  #console.log(JSON.parse(modelData[0]))
-  #console.log(selectedModel)
-  
-  controller = new window.DioramaController()
-  controller.show()
+  THREE.ImageUtils.crossOrigin = ""
+  getStageDatum().then(() ->
+    getModelData().then( () ->
+      # Stageのデータを取得後にコントローラ生成、内部でシーン生成まで先に行う
+      controller = new Sphere.DioramaController()
+      controller.show(stageJSON, stageTexturePath, modelData)
+    )
+  )
   

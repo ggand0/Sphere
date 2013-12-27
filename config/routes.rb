@@ -1,12 +1,23 @@
 Model::Application.routes.draw do
-  resources :dioramas
-  resources :model_data
-  resources :stages
+  resources :model_data do
+    collection do
+      get 'get_contents'
+    end
+  end
+  
+  resources :stages do
+    collection do
+      get 'get_contents'
+    end
+  end
 
   resources :dioramas do
     collection do
       post 'ready'
       post 'set_model'
+      get 'get_model_datum'
+      get 'get_stage'
+      get 'get_diorama'
     end
   end
 

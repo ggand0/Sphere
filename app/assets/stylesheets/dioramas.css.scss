@@ -1,32 +1,46 @@
 // Place all the styles related to the Dioramas controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+$SITE_BOX_WIDTH       : 1200px;
+$LEFT_BOX_WIDTH       : 1024px;
+$LEFT_BOX_MARGIN      : 64px;
+$SELECTION_BOX_WIDTH  : 256px;
+$SELECTION_BOX_FLOAT  : left;
+$SELECTION_BOX_MARGIN : 32px;
 
-#site-box {  width: 1200px;  }
-#left-box {
-  width: 1024px;
-  float: left;
-  margin-right:64px;
+$DEBUG                : true;
+$DEBUG_POSITION       : absolute;
+$DEBUG_WIDTH          : 100px;
+$DEBUG_HEIGHT         : 100px;
+$DEBUG_TOP            : 40px;
+$DEBUG_LEFT           : 0px;
+
+#siteBox {  width : $SITE_BOX_WIDTH;  }
+#leftBox {
+  width : $LEFT_BOX_WIDTH;
+  float : left;
+  margin-right : $LEFT_BOX_MARGIN;
 }
 #modelSelectionParent {
-  width: 256px;
-  float: left;
-  margin-right:32px;
+  width : $SELECTION_BOX_WIDTH;
+  float : $SELECTION_BOX_FLOAT;
+  margin-right : $SELECTION_BOX_MARGIN;
 }
 #modelSelection {
-  width: 256px;
-  float: left;
-  margin-right:32px;
+  width : $SELECTION_BOX_WIDTH;
+  float : $SELECTION_BOX_FLOAT;
+  margin-right : $SELECTION_BOX_MARGIN;
 }
-#right-box {
-  float: right;
+#rightBox {
+  float : right;
 }
 .debugText {
-  position: absolute;
-  width: 100px;
-  height: 100px;
-  top: 40px;
-  left: 0px;
+  visibility : if($DEBUG, visible, hidden);
+  position : $DEBUG_POSITION;
+  width : $DEBUG_WIDTH;
+  height : $DEBUG_HEIGHT;
+  top : $DEBUG_TOP;
+  left : $DEBUG_LEFT;
 }
 .item {
 

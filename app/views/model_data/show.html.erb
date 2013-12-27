@@ -1,30 +1,9 @@
-<style>
-	#stats {
-		position: absolute
-		top: 0px;
-		left: 500px;
-		zIndex: 100px;
-	}
-</style>
-
 <p id="notice"><%= notice %></p>
 
-<p>
-  <strong>Modeldata:</strong>
-	<%= javascript_tag do %>
-		window.model_json = <%= raw @model_datum.modeldata %>
-		
-		<!-- If modeldata has at least one texture, set the path -->
-		<% if !@model_datum.textures.empty? %>
-			window.texture_path = "<%= @textures[0].data.url %>";
-		<% else %>
-  			window.texture_path = "";
-		<% end %>
-	<% end %>
-</p>
+<p><strong>Modeldata:</strong></p>
+<div id="id"><%= @model_datum.id %></div>
 
-<%= javascript_include_tag "three", "stats.min", "TrackballControls", "jquery.createScene", "show_model" %>
+<%= javascript_include_tag "stats.min", "TrackballControls", "styledstats", "show_model" %>
 
 <%= link_to 'Edit', edit_model_datum_path(@model_datum) %> |
 <%= link_to 'Back', model_data_path %>
-<br>

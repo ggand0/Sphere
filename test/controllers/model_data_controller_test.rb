@@ -18,7 +18,12 @@ class ModelDataControllerTest < ActionController::TestCase
 
   test "should create model_datum" do
     assert_difference('ModelDatum.count') do
-      post :create, model_datum: { modeldata: @model_datum.modeldata }
+      upload = ActionDispatch::Http::UploadedFile.new({
+        original_filename: 'fixtures/notexture.fbx',
+        content_type: 'application/octet-stream',
+        tempfile: File.new("#{Rails.root}/test/fixtures/notexture.fbx")
+      })
+      post :create, model_datum: { title: "test", file: upload }
     end
 
     assert_redirected_to model_datum_path(assigns(:model_datum))
