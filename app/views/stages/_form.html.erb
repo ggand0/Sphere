@@ -20,12 +20,13 @@
     <p>file</p>
     <%= f.file_field :file %>
   </div>
-  <div class="field">
-	<%= f.fields_for :texture do |t| %>
-		<%= t.file_field :data %>
+  
+  <div class="files">
+	<%= f.fields_for :texture, html: { class: "upload", multipart: true } do |t| %>
+		<%= t.file_field 'stage[textures]', multiple: true %>
 	<% end %>
   </div>
-
+  
   <div class="actions">
     <%= f.submit %>
   </div>

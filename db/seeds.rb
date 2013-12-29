@@ -8,6 +8,7 @@
 
 include ActionDispatch::TestProcess
 require "#{Rails.root}/app/controllers/model_data_service"
+require 'rack/test'
 
 # ModelData
 params = {
@@ -20,23 +21,28 @@ converter = ModelDataService.new()
 model_datum = converter.convert_model_datum(params)
 model_datum.save!
 
-
 # Stage
 valid_file = File.new(Rails.root.join('spec', 'fixtures', 'files', 'backgrounddetailed6.jpg'))
 params = {
   stage: {
     file: fixture_file_upload('spec/fixtures/files/terrain0.json'),
     texture: {
-      data: fixture_file_upload('spec/fixtures/files/backgrounddetailed6.jpg', 'image/png')
-    }
+      stage: {
+        textures: [fixture_file_upload('spec/fixtures/files/backgrounddetailed6.jpg', 'image/jpg')]
+      }
+    },
+    title: 'seed data'
   }
 }
+puts params[:stage][:texture][:stage]
 
 file = params[:stage][:file]
 jsonstring = file.read
 stage = Stage.new(scene_data: jsonstring, title: params[:stage][:title])
+
 unless params[:stage][:texture].nil?
-  textures = Texture.new(data: params[:stage][:texture][:data])#'data'
-  stage.textures << textures
+  params[:stage][:texture][:stage][:textures].each do |f|
+    stage.textures << Texture.new(data: f)
+  end
 end
 stage.save!

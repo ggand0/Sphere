@@ -31,14 +31,15 @@ class StagesController < ApplicationController
   # POST /stages.json
   def create
     # JSONファイルから文字列を抽出する
-    file = params['stage']['file']
-    
+    file = params[:stage][:file]
+    dfsa
     @jsonstring = file.read
     @stage = Stage.new(scene_data: @jsonstring, title: params[:stage][:title])
 
     unless params[:stage][:texture].nil?
-      @textures = Texture.new(data: params[:stage][:texture]['data'])
-      @stage.textures << @textures
+      params[:stage][:texture][:stage][:textures].each do |f|
+        @stage.textures << Texture.new(data: f)
+      end
     end
 
     respond_to do |format|
