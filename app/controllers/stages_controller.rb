@@ -78,11 +78,11 @@ class StagesController < ApplicationController
   end
   
   def get_contents
-    @stage = Stage.find(params[:id])
+    stage = Stage.find(params[:id])
       
     # If modeldata has at least one texture, set the path
-    path = @stage.textures[0].data.url or ""
-    jsonString = { modelData: ActiveSupport::JSON.decode(@stage.scene_data), texturePath: path }
+    path = stage.textures[0] ? stage.textures[0].data.url : ""
+    jsonString = { modelData: ActiveSupport::JSON.decode(stage.scene_data), texturePath: path }
 
     render json: jsonString
   end

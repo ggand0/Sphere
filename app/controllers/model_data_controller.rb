@@ -75,11 +75,11 @@ class ModelDataController < ApplicationController
   end
   
   def get_contents
-    @model_datum = ModelDatum.find(params[:id])
+    model_datum = ModelDatum.find(params[:id])
       
     # If modeldata has at least one texture, set the path
-    path = @model_datum.textures[0].data.url or ""
-    jsonString = { modelData: ActiveSupport::JSON.decode(@model_datum.modeldata), texturePath: path }
+    path = model_datum.textures[0] ? model_datum.textures[0].data.url : ""
+    jsonString = { modelData: ActiveSupport::JSON.decode(model_datum.modeldata), texturePath: path }
 
     render json: jsonString
   end

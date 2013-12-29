@@ -1,6 +1,6 @@
 $ ->
-  DEF_MODELDATA_ID = 103
-  DEF_STAGE_ID = 6
+  DEF_MODELDATA_ID = 0
+  DEF_STAGE_ID = 0
   stageJSON = undefined
   stageTexturePath = undefined
   
@@ -39,6 +39,8 @@ $ ->
       if data['texturePath']
         url = data['texturePath']?.replace(/[^/]+$/g, "")
         stageTexturePath = url ? ''
+      else
+        stageTexturePath = ''
       deferred.resolve()
     )
     return deferred.promise()
@@ -57,6 +59,8 @@ $ ->
       if data['texturePath']
         url = data['texturePath']?.replace(/[^/]+$/g, "")
         urlBase = url ? ''
+      else
+        urlBase = ''
       console.log("modeldata texture path:")
       console.log(urlBase)
       

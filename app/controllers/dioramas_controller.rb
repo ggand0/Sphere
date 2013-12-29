@@ -1,8 +1,8 @@
 class DioramasController < ApplicationController
   before_action :set_diorama, only: [:show, :edit, :update, :destroy]
     
-  DEF_STAGE_ID = 6
-  DEF_MODEL_ID = 103
+  DEF_STAGE_ID = 0
+  DEF_MODEL_ID = 0
 
   # GET /dioramas
   # GET /dioramas.json
@@ -71,7 +71,7 @@ class DioramasController < ApplicationController
 
     # Stage追加
     @diorama.stage = Stage.find(session[:stage_id])
-
+    
     # ModelTransforms追加
     tmp = params[:diorama][:model_transforms_attributes]['0']['transform']
     objects = ActiveSupport::JSON.decode(tmp)
@@ -118,16 +118,16 @@ class DioramasController < ApplicationController
   end
   
   def get_model_datum
-    @model_datum = ModelDatum.find(params[:id])
-    path = @model_datum.textures[0].data.url or ""
-    jsonString = { modelData: ActiveSupport::JSON.decode(@model_datum.modeldata), texturePath: path }
+    model_datum = ModelDatum.find(params[:id])
+    path = model_datum.textures[0] ? model_datum.textures[0].data.url : ""
+    jsonString = { modelData: ActiveSupport::JSON.decode(model_datum.modeldata), texturePath: path }
     render json: jsonString
   end
   
   def get_stage
-    @stage = Stage.find(params[:id])
-    path = @stage.textures[0].data.url or ""
-    jsonString = { stageData: ActiveSupport::JSON.decode(@stage.scene_data), texturePath: path }
+    stage = Stage.find(params[:id])
+    path = stage.textures[0] ? stage.textures[0].data.url : ""
+    jsonString = { stageData: ActiveSupport::JSON.decode(stage.scene_data), texturePath: path }
     render json: jsonString
   end
   
@@ -135,7 +135,7 @@ class DioramasController < ApplicationController
     diorama = Diorama.find(params[:id])
     jsonString = {
       modelData: diorama.model_datum.map { |m| ActiveSupport::JSON.decode(m.modeldata) },
-      textures: diorama.model_datum.map { |m| m.textures[0].data.url or "" },
+      textures: diorama.model_datum.map { |m| m.textures[0] ? m.textures[0].data.url : "" },
       transforms: diorama.model_transforms.map {
         |t| ActiveSupport::JSON.decode(t.transform) unless t.transform.nil?
       },

@@ -30,5 +30,7 @@ Model::Application.configure do
   # lib/development.local.sample.rbをリネームし、
   # Local::IPの値を開発マシンIPに書き換える
   require "#{Rails.root}/lib/development.local.rb"
-  BetterErrors::Middleware.allow_ip! Local::IP if Local::IP
+  Local::IP.each do |ip|
+    BetterErrors::Middleware.allow_ip! ip if ip
+  end
 end

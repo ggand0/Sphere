@@ -37,6 +37,8 @@ $ ->
       if data['texturePath']
         url = data['texturePath']?.replace(/[^/]+$/g, "")
         urlBase = url ? '' # URLの最後の"/"以下を取得(404回避)
+      else
+        urlBase = ''
       deferred.resolve()
     )
     return deferred.promise()

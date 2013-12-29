@@ -19,6 +19,7 @@ params = {
 }
 converter = ModelDataService.new()
 model_datum = converter.convert_model_datum(params)
+model_datum.id = 0
 model_datum.save!
 
 # Stage
@@ -45,4 +46,5 @@ unless params[:stage][:texture].nil?
     stage.textures << Texture.new(data: f)
   end
 end
+stage.id = 0
 stage.save!
