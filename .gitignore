@@ -26,4 +26,5 @@ Gemfile.lock
 /my_data/bak
 
 # Ignore local setting file
+config/config.local.yml
 lib/development.local.rb

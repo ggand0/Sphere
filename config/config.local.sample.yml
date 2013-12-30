@@ -1,0 +1,16 @@
+# Pythonパスなどの設定を記述する。
+# ローカルの環境に合わせて変更し、'config.local.rb'にリネーム。
+defaults: &defaults
+  python_path: /usr/local/bin/python2.6
+  tmp_file_path: /var/www/diorama/my_data
+  script_path: /var/www/diorama/my_data/convert_to_threejs.py
+  
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults
