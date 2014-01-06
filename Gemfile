@@ -54,25 +54,17 @@ end
 # rails consoleを起動するために必要
 gem 'rb-readline', '~> 0.4.2'
 
-# pデバッグからの脱却
-group :development do
-  gem 'better_errors'
+
+group :development, :test do
+	gem 'better_errors'							# Improve error page
   gem 'binding_of_caller'
-end
-
-# 複数ファイルうｐ
-gem 'jquery-fileupload-rails'
-
-# Improve console
-gem 'pry-rails'
-
-# Testing framework
-gem 'rspec-rails', '>= 2.6.0', group: [:development, :test]
-
-gem 'guard'
-gem 'guard-coffeescript'
-
-# モデル関連図生成
-group :development do
-  gem "rails-erd"
+  gem 'fuubar'										# テスト進行状況可視化
+	gem 'guard'
+	gem 'guard-coffeescript'
+	gem 'jquery-fileupload-rails'		# Upload multiple files
+	gem 'rspec-rails', '>= 2.6.0'		# Testing framework
+  gem "rails-erd"									# モデル関連図生成
+  gem 'simplecov'								# カバレッジ
+	gem 'simplecov-rcov'
+	gem 'pry-rails'									# Improve console
 end

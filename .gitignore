@@ -28,3 +28,6 @@ Gemfile.lock
 # Ignore local setting file
 config/config.local.yml
 lib/development.local.rb
+
+# Ignore coverage report files
+coverage
