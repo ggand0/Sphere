@@ -36,18 +36,19 @@ class ModelDataController < ApplicationController
     # コンバート&モデル作成
     converter = ModelDataService.new()
     @model_datum = converter.convert_model_datum(params)
-
+  
     # saveしてDBへ保存
     respond_to do |format|
-      if @model_datum.save!
+      begin
+        @model_datum.save!
         format.html { redirect_to @model_datum, notice: 'Model datum was successfully created.' }
         format.json { render action: 'show', status: :created, location: @model_datum }
-      else
+      rescue ActiveRecord::RecordInvalid => e
+        puts e
         format.html { render action: 'new' }
         format.json { render json: @model_datum.errors, status: :unprocessable_entity }
       end
     end
-
   end
 
   # PATCH/PUT /model_data/1

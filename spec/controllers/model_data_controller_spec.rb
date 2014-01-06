@@ -71,7 +71,7 @@ describe ModelDataController do
 
       it "re-renders the 'new' template" do
         # Trigger the behavior that occurs when invalid params are submitted
-        ModelDatum.any_instance.stub(:save).and_return(false)
+        ModelDatum.any_instance.stub(:save!).and_raise(ActiveRecord::RecordInvalid.new(ModelDatum.new))
         post :create, { model_datum: valid_attributes }, valid_session
         puts :model_datum
         response.should render_template("new")
