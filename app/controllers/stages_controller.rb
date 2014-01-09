@@ -25,6 +25,7 @@ class StagesController < ApplicationController
 
   # GET /stages/1/edit
   def edit
+    @stage = Stage.find(params[:id])
   end
 
   # POST /stages
@@ -32,7 +33,7 @@ class StagesController < ApplicationController
   def create
     # JSONファイルから文字列を抽出する
     file = params[:stage][:file]
-    dfsa
+
     @jsonstring = file.read
     @stage = Stage.new(scene_data: @jsonstring, title: params[:stage][:title])
 
@@ -43,10 +44,11 @@ class StagesController < ApplicationController
     end
 
     respond_to do |format|
-      if @stage.save!
+      begin
+        @stage.save!
         format.html { redirect_to @stage, notice: 'Stage was successfully created.' }
         format.json { render action: 'show', status: :created, location: @stage }
-      else
+      rescue ActiveRecord::RecordInvalid => e
         format.html { render action: 'new' }
         format.json { render json: @stage.errors, status: :unprocessable_entity }
       end
@@ -56,8 +58,13 @@ class StagesController < ApplicationController
   # PATCH/PUT /stages/1
   # PATCH/PUT /stages/1.json
   def update
+    # JSONファイルから文字列を抽出する
+    file = params[:stage][:file]
+    jsonstring = file.read
+    stage_params = { scene_data: jsonstring, title: params[:stage][:title] }
+    
     respond_to do |format|
-      if @stage.update(stage_params)
+      if @stage.update_attributes(stage_params)
         format.html { redirect_to @stage, notice: 'Stage was successfully updated.' }
         format.json { head :no_content }
       else
