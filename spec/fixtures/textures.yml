@@ -1,0 +1,3 @@
+texture:
+  id: 1
+  created_at: Datetime.now
