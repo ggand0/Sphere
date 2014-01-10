@@ -49,6 +49,7 @@ describe StagesController do
 
   describe "GET index" do
     it "assigns all stages as @stages" do
+      Stage.delete_all  # 空であることを保証
       stage = Stage.create! @valid_attributes
       get :index, {}, valid_session
       assigns(:stages).should eq([stage])

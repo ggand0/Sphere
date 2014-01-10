@@ -27,6 +27,7 @@ class DioramasController < ApplicationController
   # GET /dioramas/new
   def new
     @diorama = Diorama.new
+    #@diorama.model_transforms.build
 
     # 素材配置のために格納しておく
     @model_data = ModelDatum.all
@@ -68,14 +69,12 @@ class DioramasController < ApplicationController
   # POST /dioramas.json
   def create
     @diorama = Diorama.new(title: params[:diorama][:title])
-
     # Stage追加
-    @diorama.stage = Stage.find(session[:stage_id])
+    @diorama.stage = Stage.find(params[:diorama][:stage])
     
     # ModelTransforms追加
-    tmp = params[:diorama][:model_transforms_attributes]['0']['transform']
+    tmp = params[:diorama][:model_transforms]
     objects = ActiveSupport::JSON.decode(tmp)
-    
     objects.each do |obj|
       # convert array to string
       @transform = ModelTransform.new(transform: obj['pos'].to_s, model_datum: ModelDatum.find(obj['id']))
@@ -83,10 +82,12 @@ class DioramasController < ApplicationController
     end
     
     respond_to do |format|
-      if @diorama.save!
+      begin
+        @diorama.save!
         format.html { redirect_to @diorama, notice: 'Diorama was successfully created.' }
         format.json { render action: 'show', status: :created, location: @diorama }
-      else
+      rescue ActiveRecord::RecordInvalid => e
+        puts e
         format.html { render action: 'new' }
         format.json { render json: @diorama.errors, status: :unprocessable_entity }
       end
@@ -96,8 +97,24 @@ class DioramasController < ApplicationController
   # PATCH/PUT /dioramas/1
   # PATCH/PUT /dioramas/1.json
   def update
+    # ModelTransforms追加
+    tmp = params[:diorama][:model_transforms]
+    objects = ActiveSupport::JSON.decode(tmp)
+    
+    @diorama.model_transforms.clear
+    transforms = objects.map do |obj|
+      ModelTransform.new(transform: obj['pos'].to_s, model_datum: ModelDatum.find(obj['id']))
+    end
+    @diorama.model_transforms = transforms
+    
+    diorama_params = {
+      title: params[:diorama][:title],
+      #stage: Stage.find(params[:diorama][:stage]),
+      #model_transforms: transforms
+    }
+    
     respond_to do |format|
-      if @diorama.update(diorama_params)
+      if @diorama.update_attributes(diorama_params)
         format.html { redirect_to @diorama, notice: 'Diorama was successfully updated.' }
         format.json { head :no_content }
       else

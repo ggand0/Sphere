@@ -22,10 +22,7 @@
   
   <div class="field">
   	<%= f.label :model_transforms %><br>
-  	<% @diorama.model_transforms.build %>
-	<%= f.fields_for :model_transforms do |mt| %>
-		<%= mt.text_field :transform, :id => "transforms_field" %>
-	<% end %>
+		<%= f.text_field :model_transforms, :id => "transforms_field", :value => "" %>
   </div>
   <div class="actions">
     <%= f.submit %>
