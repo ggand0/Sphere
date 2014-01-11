@@ -68,6 +68,7 @@ class DioramaController
     loader.parse(data, (result) ->
       dioramaModel.setModelDatum(result.scene.children, modelId)
       console.log("Modeldata request done.")
+      console.log(result)
     , path)
    
   

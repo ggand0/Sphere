@@ -13,15 +13,8 @@
 describe "diorama controller", ->
   controller = undefined
   
-  
-  ###beforeEach ->
-    #controller = new Sphere.DioramaController()
-    #controller = new window.DioramaController
-    controller = new DioramaController()
-    #model = new Sphere.Diorama()###
-  
-  it "should have DioramaModel", ->
+  ###it "should have DioramaModel", ->
     #expect(controller.dioramaModel).toEqual(model)
     controller = new Sphere.DioramaController()
     model = new Sphere.Diorama()
-    controller.dioramaModel.should.eql(model)
+    controller.dioramaModel.should.eql(model)###
