@@ -62,7 +62,9 @@ group :development, :test do
   gem 'fuubar'										# テスト進行状況可視化
 	gem 'guard'
 	gem 'guard-coffeescript'
-	gem 'jasmine'
+	#gem 'jasmine'
+	#gem "jasminerice", :git => 'https://github.com/bradphelan/jasminerice.git'
+	gem 'konacha'
 	gem 'jquery-fileupload-rails'		# Upload multiple files
 	gem 'rspec-rails', '>= 2.6.0'		# Testing framework
   gem "rails-erd"									# モデル関連図生成
