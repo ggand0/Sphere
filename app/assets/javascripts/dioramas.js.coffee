@@ -53,8 +53,8 @@ class Diorama
     return { dataId: @modelData.indexOf(meshData), meshId: meshData.indexOf(mesh) }
   
   # TODO: Mesh単位の削除に対応する
-  selected = (data) ->
-    for mesh in data.meshData
+  isSelected: (modeldata) ->
+    for mesh in modeldata.meshData
       if mesh.userData['selected']
         return true
     return false
@@ -66,11 +66,12 @@ class Diorama
   deleteModels: () ->
     console.log("Removing targets from @modelData...")
     #dels = (getIndices(meshData, mesh) for mesh in data.meshData for data in @modelData when mesh.userData.selected)
+    self = @
     
     # 選択されていないdataだけ残したmodelDataを新たに設定する
     newModelData = @modelData.filter(
-      (data) ->
-        return !selected(data)
+      (modeldata) ->
+        return !self.isSelected(modeldata)# 未選択の要素を残す
     )
     @setModelData(newModelData)
 
