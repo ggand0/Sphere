@@ -64,7 +64,10 @@ group :development, :test do
 	gem 'guard-coffeescript'
 	#gem 'jasmine'
 	#gem "jasminerice", :git => 'https://github.com/bradphelan/jasminerice.git'
-	gem 'konacha'
+	#gem 'konacha'
+	gem "phantomjs", ">= 1.8.1.1"
+	gem 'mocha', '~> 0.14.0', :require => false
+	gem 'teaspoon'
 	gem 'jquery-fileupload-rails'		# Upload multiple files
 	gem 'rspec-rails', '>= 2.6.0'		# Testing framework
   gem "rails-erd"									# モデル関連図生成
