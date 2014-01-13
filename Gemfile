@@ -62,6 +62,8 @@ group :development, :test do
   gem 'fuubar'										# テスト進行状況可視化
 	gem 'guard'
 	gem 'guard-coffeescript'
+	gem 'guard-teaspoon'
+	gem 'rb-fsevent'								# used by guard
 	#gem 'jasmine'
 	#gem "jasminerice", :git => 'https://github.com/bradphelan/jasminerice.git'
 	#gem 'konacha'
