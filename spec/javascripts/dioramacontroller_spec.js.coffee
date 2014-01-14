@@ -1,14 +1,4 @@
-#require 'app/assets/javascripts/dioramacontroller.js.coffee'
-#= require jquery
-#= require jquery_ujs
-#= require turbolinks
-#= require jquery-fileupload/basic
-#= require threejs/build/three.js
-
-#= require application
-#= require dioramacontroller
-#= require dioramas
-#= require dioramaview
+#= require spec_helper
 
 describe "diorama controller", ->
   controller = undefined

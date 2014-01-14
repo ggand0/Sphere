@@ -32,19 +32,20 @@
 # For more information: http://github.com/modeset/teaspoon
 #
 # You can require javascript files here. A good place to start is by requiring your application.js.
-# require application
-# require support/chai
-console.log("helper is loaded.")
-
-window.expect = chai.expect
-window.teaspoontest = 'debug'
-
+#= require application
 #= require jquery
 #= require jquery_ujs
 #= require turbolinks
 #= require jquery-fileupload/basic
 #= require threejs/build/three.js
-
+#= require stats.min
 #= require dioramacontroller
 #= require dioramas
+#= require styledstats
 #= require dioramaview
+
+console.log("helper is loaded.")
+#console.log(Sphere)
+
+window.expect = chai.expect
+window.teaspoontest = 'debug'
